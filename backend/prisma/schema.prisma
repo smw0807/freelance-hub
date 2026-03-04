@@ -1,0 +1,170 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserPlan {
+  FREE
+  PRO
+}
+
+enum Platform {
+  KMONG
+  SOOMGO
+  FREELANCERKOREA
+  CREMON
+  DIRECT
+  OTHER
+}
+
+enum ProjectStatus {
+  INQUIRY
+  NEGOTIATING
+  IN_PROGRESS
+  DELIVERED
+  COMPLETED
+  CANCELLED
+}
+
+enum QuoteStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+enum IncomeType {
+  DEPOSIT
+  BALANCE
+  FULL
+  EXTRA
+}
+
+model User {
+  id               String    @id @default(cuid())
+  email            String    @unique
+  name             String
+  phone            String?
+  plan             UserPlan  @default(FREE)
+  planExpiredAt    DateTime?
+  hourlyRate       Int?
+  kakaoOauthId     String?   @unique
+  password         String?
+  refreshTokenHash String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  clients  Client[]
+  projects Project[]
+  incomes  Income[]
+}
+
+model Client {
+  id            String    @id @default(cuid())
+  userId        String
+  name          String
+  contactName   String?
+  phone         String?
+  email         String?
+  platform      Platform  @default(DIRECT)
+  businessNo    String?
+  isBlacklisted Boolean   @default(false)
+  rating        Int?
+  memo          String?
+  deletedAt     DateTime?
+  createdAt     DateTime  @default(now())
+
+  user     User      @relation(fields: [userId], references: [id])
+  projects Project[]
+}
+
+model Project {
+  id              String        @id @default(cuid())
+  userId          String
+  clientId        String?
+  title           String
+  status          ProjectStatus @default(INQUIRY)
+  contractAmount  Int           @default(0)
+  depositAmount   Int           @default(0)
+  depositPaidAt   DateTime?
+  balanceAmount   Int           @default(0)
+  balancePaidAt   DateTime?
+  includeVat      Boolean       @default(false)
+  platform        Platform      @default(DIRECT)
+  platformFeeRate Float         @default(0)
+  startedAt       DateTime?
+  deadlineAt      DateTime?
+  deliveredAt     DateTime?
+  tags            String[]
+  memo            String?
+  createdAt       DateTime      @default(now())
+
+  user           User            @relation(fields: [userId], references: [id])
+  client         Client?         @relation(fields: [clientId], references: [id])
+  checklistItems ChecklistItem[]
+  quotes         Quote[]
+  incomes        Income[]
+  timeLogs       TimeLog[]
+}
+
+model ChecklistItem {
+  id        String   @id @default(cuid())
+  projectId String
+  title     String
+  isDone    Boolean  @default(false)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id])
+}
+
+model Quote {
+  id             String      @id @default(cuid())
+  projectId      String
+  quoteNo        String      @unique
+  status         QuoteStatus @default(DRAFT)
+  items          Json        @default("[]")
+  subtotal       Int         @default(0)
+  vatAmount      Int         @default(0)
+  discountAmount Int         @default(0)
+  totalAmount    Int         @default(0)
+  shareToken     String?     @unique
+  expiresAt      DateTime?
+  viewedAt       DateTime?
+  memo           String?
+  createdAt      DateTime    @default(now())
+
+  project Project @relation(fields: [projectId], references: [id])
+}
+
+model Income {
+  id               String     @id @default(cuid())
+  projectId        String
+  userId           String
+  incomeType       IncomeType @default(FULL)
+  amount           Int
+  isWithholdingTax Boolean    @default(false)
+  netAmount        Int
+  paidAt           DateTime
+  memo             String?
+  createdAt        DateTime   @default(now())
+
+  project Project @relation(fields: [projectId], references: [id])
+  user    User    @relation(fields: [userId], references: [id])
+}
+
+model TimeLog {
+  id              String    @id @default(cuid())
+  projectId       String
+  description     String?
+  startedAt       DateTime
+  endedAt         DateTime?
+  durationMinutes Int?
+  createdAt       DateTime  @default(now())
+
+  project Project @relation(fields: [projectId], references: [id])
+}

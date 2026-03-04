@@ -1,0 +1,99 @@
+<template>
+  <div class="flex-1 overflow-y-auto">
+    <div class="p-6 space-y-4">
+      <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold">프로젝트</h1>
+        <NuxtLink to="/projects/new">
+          <UButton icon="i-heroicons-plus">새 프로젝트</UButton>
+        </NuxtLink>
+      </div>
+
+      <UTabs v-model="activeStatus" :items="tabs" @update:model-value="fetchProjects">
+        <template #default>
+          <div class="mt-4">
+            <UCard :ui="{ body: 'p-0' }">
+              <UTable :data="projects" :columns="columns" :loading="loading">
+                <template #title-cell="{ row }">
+                  <NuxtLink :to="`/projects/${row.original.id}`" class="font-medium hover:text-primary-500">
+                    {{ row.original.title }}
+                  </NuxtLink>
+                </template>
+                <template #client-cell="{ row }">
+                  {{ row.original.client?.name || '-' }}
+                </template>
+                <template #contractAmount-cell="{ row }">
+                  ₩{{ row.original.contractAmount.toLocaleString() }}
+                </template>
+                <template #status-cell="{ row }">
+                  <UBadge :color="statusColor(row.original.status)" variant="soft" size="sm">
+                    {{ statusLabel(row.original.status) }}
+                  </UBadge>
+                </template>
+                <template #deadlineAt-cell="{ row }">
+                  {{ row.original.deadlineAt ? new Date(row.original.deadlineAt).toLocaleDateString('ko-KR') : '-' }}
+                </template>
+              </UTable>
+            </UCard>
+          </div>
+        </template>
+      </UTabs>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+definePageMeta({ middleware: 'auth' })
+
+const { $api } = useNuxtApp()
+
+const projects = ref([])
+const loading = ref(false)
+const activeStatus = ref('')
+
+const tabs = [
+  { label: '전체', value: '' },
+  { label: '문의', value: 'INQUIRY' },
+  { label: '협의중', value: 'NEGOTIATING' },
+  { label: '진행중', value: 'IN_PROGRESS' },
+  { label: '납품', value: 'DELIVERED' },
+  { label: '완료', value: 'COMPLETED' },
+]
+
+const columns = [
+  { key: 'title', header: '프로젝트명' },
+  { key: 'client', header: '클라이언트' },
+  { key: 'status', header: '상태' },
+  { key: 'contractAmount', header: '계약금액' },
+  { key: 'deadlineAt', header: '마감일' },
+]
+
+async function fetchProjects() {
+  loading.value = true
+  try {
+    const params: any = {}
+    if (activeStatus.value) params.status = activeStatus.value
+    const res = await ($api as any)('/projects?' + new URLSearchParams(params).toString())
+    projects.value = res.data
+  } finally {
+    loading.value = false
+  }
+}
+
+function statusLabel(s: string) {
+  const map: any = {
+    INQUIRY: '문의', NEGOTIATING: '협의중', IN_PROGRESS: '진행중',
+    DELIVERED: '납품', COMPLETED: '완료', CANCELLED: '취소',
+  }
+  return map[s] || s
+}
+
+function statusColor(s: string) {
+  const map: any = {
+    INQUIRY: 'gray', NEGOTIATING: 'warning', IN_PROGRESS: 'primary',
+    DELIVERED: 'info', COMPLETED: 'success', CANCELLED: 'error',
+  }
+  return map[s] || 'gray'
+}
+
+onMounted(fetchProjects)
+</script>
