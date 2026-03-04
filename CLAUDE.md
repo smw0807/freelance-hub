@@ -36,7 +36,7 @@ yarn test:e2e
 yarn lint
 ```
 
-서버는 `PORT` 환경변수를 사용하며 기본값은 `3000`.
+서버는 `APP_PORT` 환경변수를 사용하며 기본값은 `3002`.
 
 ### 프론트엔드 (`frontend/`)
 
