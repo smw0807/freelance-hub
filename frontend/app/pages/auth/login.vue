@@ -19,7 +19,7 @@
       </UButton>
     </UForm>
 
-    <UDivider label="또는" class="my-4" />
+    <USeparator label="또는" class="my-4" />
 
     <UButton
       variant="outline"
