@@ -48,6 +48,11 @@ export class AuthController {
     );
   }
 
+  @Post('kakao/code')
+  kakaoCode(@Body() body: { code: string; redirectUri: string }) {
+    return this.authService.kakaoCodeLogin(body.code, body.redirectUri);
+  }
+
   @Post('refresh')
   @UseGuards(JwtRefreshGuard)
   refresh(@CurrentUser() user: { id: string; refreshToken: string }) {

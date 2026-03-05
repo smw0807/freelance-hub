@@ -78,6 +78,31 @@ export class AuthService {
     return this.issueTokens(user.id, user.email);
   }
 
+  async kakaoCodeLogin(code: string, redirectUri: string) {
+    const tokenRes = await fetch('https://kauth.kakao.com/oauth/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        grant_type: 'authorization_code',
+        client_id: this.configService.get('KAKAO_CLIENT_ID')!,
+        redirect_uri: redirectUri,
+        code,
+      }),
+    });
+    const tokenData = await tokenRes.json();
+
+    const profileRes = await fetch('https://kapi.kakao.com/v2/user/me', {
+      headers: { Authorization: `Bearer ${tokenData.access_token}` },
+    });
+    const profile = await profileRes.json();
+
+    return this.kakaoLogin({
+      kakaoOauthId: String(profile.id),
+      name: profile.kakao_account?.profile?.nickname || '사용자',
+      email: profile.kakao_account?.email,
+    });
+  }
+
   async refresh(userId: string, refreshToken: string) {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user?.refreshTokenHash)
