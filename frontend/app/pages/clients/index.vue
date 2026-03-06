@@ -3,9 +3,7 @@
     <div class="p-6 space-y-4">
       <div class="flex items-center justify-between">
         <h1 class="text-2xl font-bold">클라이언트</h1>
-        <NuxtLink to="/clients/new">
-          <UButton icon="i-heroicons-plus">새 클라이언트</UButton>
-        </NuxtLink>
+        <UButton to="/clients/new" icon="i-heroicons-plus">새 클라이언트</UButton>
       </div>
 
       <div class="flex gap-3">

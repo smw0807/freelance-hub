@@ -3,40 +3,36 @@
     <div class="p-6 space-y-4">
       <div class="flex items-center justify-between">
         <h1 class="text-2xl font-bold">프로젝트</h1>
-        <NuxtLink to="/projects/new">
-          <UButton icon="i-heroicons-plus">새 프로젝트</UButton>
-        </NuxtLink>
+        <UButton to="/projects/new" icon="i-heroicons-plus">새 프로젝트</UButton>
       </div>
 
-      <UTabs v-model="activeStatus" :items="tabs" @update:model-value="fetchProjects">
-        <template #default>
-          <div class="mt-4">
-            <UCard :ui="{ body: 'p-0' }">
-              <UTable :data="projects" :columns="columns" :loading="loading">
-                <template #title-cell="{ row }">
-                  <NuxtLink :to="`/projects/${row.original.id}`" class="font-medium hover:text-primary-500">
-                    {{ row.original.title }}
-                  </NuxtLink>
-                </template>
-                <template #client-cell="{ row }">
-                  {{ row.original.client?.name || '-' }}
-                </template>
-                <template #contractAmount-cell="{ row }">
-                  ₩{{ row.original.contractAmount.toLocaleString() }}
-                </template>
-                <template #status-cell="{ row }">
-                  <UBadge :color="statusColor(row.original.status)" variant="soft" size="sm">
-                    {{ statusLabel(row.original.status) }}
-                  </UBadge>
-                </template>
-                <template #deadlineAt-cell="{ row }">
-                  {{ row.original.deadlineAt ? new Date(row.original.deadlineAt).toLocaleDateString('ko-KR') : '-' }}
-                </template>
-              </UTable>
-            </UCard>
-          </div>
-        </template>
-      </UTabs>
+      <UTabs v-model="activeStatus" :items="tabs" @update:model-value="fetchProjects" />
+
+      <div class="mt-4">
+        <UCard :ui="{ body: 'p-0' }">
+          <UTable :data="projects" :columns="columns" :loading="loading">
+            <template #title-cell="{ row }">
+              <NuxtLink :to="`/projects/${row.original.id}`" class="font-medium hover:text-primary-500">
+                {{ row.original.title }}
+              </NuxtLink>
+            </template>
+            <template #client-cell="{ row }">
+              {{ row.original.client?.name || '-' }}
+            </template>
+            <template #contractAmount-cell="{ row }">
+              ₩{{ row.original.contractAmount.toLocaleString() }}
+            </template>
+            <template #status-cell="{ row }">
+              <UBadge :color="statusColor(row.original.status)" variant="soft" size="sm">
+                {{ statusLabel(row.original.status) }}
+              </UBadge>
+            </template>
+            <template #deadlineAt-cell="{ row }">
+              {{ row.original.deadlineAt ? new Date(row.original.deadlineAt).toLocaleDateString('ko-KR') : '-' }}
+            </template>
+          </UTable>
+        </UCard>
+      </div>
     </div>
   </div>
 </template>

@@ -3,9 +3,7 @@
     <div class="p-6 space-y-4">
       <div class="flex items-center justify-between">
         <h1 class="text-2xl font-bold">견적서</h1>
-        <NuxtLink to="/quotes/new">
-          <UButton icon="i-heroicons-plus">새 견적서</UButton>
-        </NuxtLink>
+        <UButton to="/quotes/new" icon="i-heroicons-plus">새 견적서</UButton>
       </div>
 
       <UCard :ui="{ body: 'p-0' }">

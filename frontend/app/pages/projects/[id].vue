@@ -2,7 +2,7 @@
   <div class="flex-1 overflow-y-auto">
     <div class="p-6 space-y-6" v-if="project">
       <div class="flex items-center gap-3">
-        <NuxtLink to="/projects"><UButton variant="ghost" icon="i-heroicons-arrow-left" /></NuxtLink>
+        <UButton to="/projects" variant="ghost" icon="i-heroicons-arrow-left" />
         <div>
           <h1 class="text-2xl font-bold">{{ project.title }}</h1>
           <p class="text-gray-500 text-sm">{{ project.client?.name }}</p>

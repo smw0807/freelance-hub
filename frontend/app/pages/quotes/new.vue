@@ -2,7 +2,7 @@
   <div class="flex-1 overflow-y-auto">
     <div class="p-6 max-w-3xl mx-auto space-y-6">
       <div class="flex items-center gap-3">
-        <NuxtLink to="/quotes"><UButton variant="ghost" icon="i-heroicons-arrow-left" /></NuxtLink>
+        <UButton to="/quotes" variant="ghost" icon="i-heroicons-arrow-left" />
         <h1 class="text-2xl font-bold">새 견적서</h1>
       </div>
 
@@ -63,7 +63,7 @@
           <UAlert v-if="error" color="error" :description="error" />
 
           <div class="flex justify-end gap-3">
-            <NuxtLink to="/quotes"><UButton variant="outline">취소</UButton></NuxtLink>
+            <UButton to="/quotes" variant="outline">취소</UButton>
             <UButton :loading="loading" @click="onSubmit">저장</UButton>
           </div>
         </div>

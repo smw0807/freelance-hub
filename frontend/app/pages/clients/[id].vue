@@ -2,7 +2,7 @@
   <div class="flex-1 overflow-y-auto">
     <div class="p-6 space-y-6" v-if="client">
       <div class="flex items-center gap-3">
-        <NuxtLink to="/clients"><UButton variant="ghost" icon="i-heroicons-arrow-left" /></NuxtLink>
+        <UButton to="/clients" variant="ghost" icon="i-heroicons-arrow-left" />
         <div>
           <h1 class="text-2xl font-bold">{{ client.name }}</h1>
           <p class="text-gray-500 text-sm">{{ client.contactName }}</p>
@@ -47,9 +47,7 @@
         <template #header>
           <div class="flex items-center justify-between">
             <h2 class="font-semibold">프로젝트 히스토리</h2>
-            <NuxtLink :to="`/projects/new?clientId=${client.id}`">
-              <UButton size="sm" variant="outline" icon="i-heroicons-plus">새 프로젝트</UButton>
-            </NuxtLink>
+            <UButton :to="`/projects/new?clientId=${client.id}`" size="sm" variant="outline" icon="i-heroicons-plus">새 프로젝트</UButton>
           </div>
         </template>
         <div v-if="!projects.length" class="text-center text-gray-400 py-6">프로젝트가 없습니다.</div>
