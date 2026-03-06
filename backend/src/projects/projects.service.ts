@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { normalizeDates } from '../common/utils/date.util';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
@@ -9,7 +10,7 @@ import { ProjectStatus } from '@prisma/client';
 
 @Injectable()
 export class ProjectsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async findAll(userId: string, query: QueryProjectDto) {
     const { status, startFrom, startTo, page = 1, limit = 20 } = query;
@@ -60,12 +61,12 @@ export class ProjectsService {
   }
 
   async create(userId: string, dto: CreateProjectDto) {
-    return this.prisma.project.create({ data: { ...dto, userId } });
+    return this.prisma.project.create({ data: { ...normalizeDates(dto), userId } });
   }
 
   async update(userId: string, id: string, dto: UpdateProjectDto) {
     await this.assertOwner(userId, id);
-    return this.prisma.project.update({ where: { id }, data: dto });
+    return this.prisma.project.update({ where: { id }, data: normalizeDates(dto) });
   }
 
   async updateStatus(userId: string, id: string, status: ProjectStatus) {

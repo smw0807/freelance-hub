@@ -1,12 +1,13 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { normalizeDates } from '../common/utils/date.util';
 import { CreateIncomeDto } from './dto/create-income.dto';
 import { UpdateIncomeDto } from './dto/update-income.dto';
 import { QueryIncomeDto } from './dto/query-income.dto';
 
 @Injectable()
 export class IncomesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async findAll(userId: string, query: QueryIncomeDto) {
     const { year, month } = query;
@@ -46,7 +47,7 @@ export class IncomesService {
       : dto.amount;
 
     return this.prisma.income.create({
-      data: { ...dto, userId, isWithholdingTax, netAmount },
+      data: { ...normalizeDates(dto), userId, isWithholdingTax, netAmount },
     });
   }
 
@@ -64,7 +65,7 @@ export class IncomesService {
 
     return this.prisma.income.update({
       where: { id },
-      data: { ...dto, netAmount },
+      data: { ...normalizeDates(dto), netAmount },
     });
   }
 
