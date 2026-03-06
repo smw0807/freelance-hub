@@ -92,13 +92,13 @@ const taxReport = ref<any>(null)
 const projects = ref<any[]>([])
 const loading = ref(false)
 const filterYear = ref(String(new Date().getFullYear()))
-const filterMonth = ref('')
+const filterMonth = ref('all')
 const addModalOpen = ref(false)
 const addLoading = ref(false)
 const addError = ref('')
 
 const addForm = reactive({
-  projectId: '',
+  projectId: 'none',
   incomeType: 'FULL',
   amount: 0,
   isWithholdingTax: false,
@@ -107,13 +107,13 @@ const addForm = reactive({
 })
 
 const columns = [
-  { key: 'project', header: '프로젝트' },
-  { key: 'incomeType', header: '유형' },
-  { key: 'amount', header: '금액' },
-  { key: 'netAmount', header: '실수령' },
-  { key: 'isWithholdingTax', header: '원천징수' },
-  { key: 'paidAt', header: '지급일' },
-  { key: 'actions', header: '' },
+  { accessorKey: 'project', header: '프로젝트' },
+  { accessorKey: 'incomeType', header: '유형' },
+  { accessorKey: 'amount', header: '금액' },
+  { accessorKey: 'netAmount', header: '실수령' },
+  { accessorKey: 'isWithholdingTax', header: '원천징수' },
+  { accessorKey: 'paidAt', header: '지급일' },
+  { id: 'actions', header: '' },
 ]
 
 const yearItems = Array.from({ length: 5 }, (_, i) => {
@@ -122,7 +122,7 @@ const yearItems = Array.from({ length: 5 }, (_, i) => {
 })
 
 const monthItems = [
-  { label: '전체', value: '' },
+  { label: '전체', value: 'all' },
   ...Array.from({ length: 12 }, (_, i) => ({ label: `${i + 1}월`, value: String(i + 1) })),
 ]
 
@@ -134,7 +134,7 @@ const incomeTypeItems = [
 ]
 
 const projectItems = computed(() => [
-  { label: '선택...', value: '' },
+  { label: '선택...', value: 'none' },
   ...projects.value.map((p: any) => ({ label: p.title, value: p.id })),
 ])
 
@@ -143,7 +143,7 @@ async function fetchIncomes() {
   try {
     const params: any = {}
     if (filterYear.value) params.year = filterYear.value
-    if (filterMonth.value) params.month = filterMonth.value
+    if (filterMonth.value !== 'all') params.month = filterMonth.value
     incomes.value = await ($api as any)('/incomes?' + new URLSearchParams(params).toString())
   } finally {
     loading.value = false
@@ -151,7 +151,7 @@ async function fetchIncomes() {
 }
 
 async function fetchAll() {
-  filterMonth.value = ''
+  filterMonth.value = 'all'
   await Promise.all([
     fetchIncomes(),
     (async () => { summary.value = await ($api as any)('/incomes/summary') })(),
@@ -166,7 +166,7 @@ async function deleteIncome(id: string) {
 }
 
 async function addIncome() {
-  if (!addForm.projectId || !addForm.amount) { addError.value = '필수 항목을 입력해주세요.'; return }
+  if (!addForm.projectId || addForm.projectId === 'none' || !addForm.amount) { addError.value = '필수 항목을 입력해주세요.'; return }
   addLoading.value = true
   addError.value = ''
   try {

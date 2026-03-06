@@ -61,7 +61,7 @@ const route = useRoute()
 
 const form = reactive({
   title: '',
-  clientId: route.query.clientId as string || '',
+  clientId: route.query.clientId as string || 'none',
   status: 'INQUIRY',
   contractAmount: 0,
   depositAmount: 0,
@@ -77,7 +77,7 @@ const error = ref('')
 const clients = ref<any[]>([])
 
 const clientItems = computed(() => [
-  { label: '선택 안 함', value: '' },
+  { label: '선택 안 함', value: 'none' },
   ...clients.value.map((c: any) => ({ label: c.name, value: c.id })),
 ])
 
@@ -107,7 +107,7 @@ async function onSubmit() {
   error.value = ''
   try {
     const body: any = { ...form }
-    if (!body.clientId) delete body.clientId
+    if (!body.clientId || body.clientId === 'none') delete body.clientId
     if (!body.startedAt) delete body.startedAt
     if (!body.deadlineAt) delete body.deadlineAt
     const project = await ($api as any)('/projects', { method: 'POST', body })

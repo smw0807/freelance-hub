@@ -83,7 +83,7 @@ const error = ref('')
 const includeVat = ref(false)
 
 const form = reactive({
-  projectId: '',
+  projectId: 'none',
   items: [{ description: '', quantity: 1, unitPrice: 0, amount: 0 }],
   subtotal: 0,
   vatAmount: 0,
@@ -93,7 +93,7 @@ const form = reactive({
 })
 
 const projectItems = computed(() => [
-  { label: '선택...', value: '' },
+  { label: '선택...', value: 'none' },
   ...projects.value.map((p: any) => ({ label: p.title, value: p.id })),
 ])
 
@@ -121,7 +121,7 @@ function recalculate() {
 }
 
 async function onSubmit() {
-  if (!form.projectId) { error.value = '프로젝트를 선택해주세요.'; return }
+  if (!form.projectId || form.projectId === 'none') { error.value = '프로젝트를 선택해주세요.'; return }
   loading.value = true
   error.value = ''
   try {

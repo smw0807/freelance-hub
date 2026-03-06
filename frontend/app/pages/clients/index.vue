@@ -17,7 +17,7 @@
         <USelect
           v-model="blacklistFilter"
           :items="[
-            { label: '전체', value: '' },
+            { label: '전체', value: 'all' },
             { label: '블랙리스트 제외', value: 'false' },
             { label: '블랙리스트만', value: 'true' },
           ]"
@@ -62,6 +62,8 @@
 </template>
 
 <script setup lang="ts">
+import { useDebounceFn } from '@vueuse/core'
+
 definePageMeta({ middleware: 'auth' })
 
 const { $api } = useNuxtApp()
@@ -71,15 +73,15 @@ const total = ref(0)
 const page = ref(1)
 const loading = ref(false)
 const search = ref('')
-const blacklistFilter = ref('')
+const blacklistFilter = ref('all')
 
 const columns = [
-  { key: 'name', header: '이름' },
-  { key: 'contactName', header: '담당자' },
-  { key: 'phone', header: '연락처' },
-  { key: 'platform', header: '플랫폼' },
-  { key: 'isBlacklisted', header: '상태' },
-  { key: 'actions', header: '' },
+  { accessorKey: 'name', header: '이름' },
+  { accessorKey: 'contactName', header: '담당자' },
+  { accessorKey: 'phone', header: '연락처' },
+  { accessorKey: 'platform', header: '플랫폼' },
+  { accessorKey: 'isBlacklisted', header: '상태' },
+  { id: 'actions', header: '' },
 ]
 
 async function fetchClients() {
@@ -87,7 +89,7 @@ async function fetchClients() {
   try {
     const params: any = { page: page.value }
     if (search.value) params.search = search.value
-    if (blacklistFilter.value !== '') params.isBlacklisted = blacklistFilter.value
+    if (blacklistFilter.value !== 'all') params.isBlacklisted = blacklistFilter.value
     const res = await ($api as any)('/clients?' + new URLSearchParams(params).toString())
     clients.value = res.data
     total.value = res.total

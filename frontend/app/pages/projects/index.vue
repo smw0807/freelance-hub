@@ -56,11 +56,11 @@ const tabs = [
 ]
 
 const columns = [
-  { key: 'title', header: '프로젝트명' },
-  { key: 'client', header: '클라이언트' },
-  { key: 'status', header: '상태' },
-  { key: 'contractAmount', header: '계약금액' },
-  { key: 'deadlineAt', header: '마감일' },
+  { accessorKey: 'title', header: '프로젝트명' },
+  { accessorKey: 'client', header: '클라이언트' },
+  { accessorKey: 'status', header: '상태' },
+  { accessorKey: 'contractAmount', header: '계약금액' },
+  { accessorKey: 'deadlineAt', header: '마감일' },
 ]
 
 async function fetchProjects() {

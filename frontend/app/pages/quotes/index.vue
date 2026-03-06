@@ -42,11 +42,11 @@ const quotes = ref([])
 const loading = ref(false)
 
 const columns = [
-  { key: 'quoteNo', header: '견적번호' },
-  { key: 'project', header: '프로젝트' },
-  { key: 'totalAmount', header: '금액' },
-  { key: 'status', header: '상태' },
-  { key: 'createdAt', header: '발행일' },
+  { accessorKey: 'quoteNo', header: '견적번호' },
+  { accessorKey: 'project', header: '프로젝트' },
+  { accessorKey: 'totalAmount', header: '금액' },
+  { accessorKey: 'status', header: '상태' },
+  { accessorKey: 'createdAt', header: '발행일' },
 ]
 
 function quoteStatusLabel(s: string) {
