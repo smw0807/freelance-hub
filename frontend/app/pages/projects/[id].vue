@@ -100,7 +100,7 @@
               <UInput v-model.number="editForm.balanceAmount" type="number" />
             </UFormField>
             <UFormField label="플랫폼">
-              <UInput v-model="editForm.platform" />
+              <USelect v-model="editForm.platform" :items="platformItems" />
             </UFormField>
             <UFormField label="시작일">
               <UInput v-model="editForm.startedAt" type="date" />
@@ -260,6 +260,15 @@ const activeLogId = ref<string | null>(null);
 const timerStart = ref<Date | null>(null);
 const elapsedTime = ref('00:00:00');
 let timerInterval: ReturnType<typeof setInterval> | null = null;
+
+const platformItems = [
+  { label: '직접 계약', value: 'DIRECT' },
+  { label: '크몽', value: 'KMONG' },
+  { label: '숨고', value: 'SOOMGO' },
+  { label: '이랜서', value: 'ELANCER' },
+  { label: '원티드 긱스', value: 'WANTEDGIGS' },
+  { label: '기타', value: 'OTHER' },
+];
 
 const statusItems = [
   { label: '문의', value: 'INQUIRY' },
