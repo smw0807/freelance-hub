@@ -48,7 +48,7 @@
             size="xs"
             variant="soft"
             class="mt-2"
-            @click="markPaid('deposit')"
+            @click="confirmPaid('deposit')"
           >
             수령 완료
           </UButton>
@@ -69,7 +69,7 @@
             size="xs"
             variant="soft"
             class="mt-2"
-            @click="markPaid('balance')"
+            @click="confirmPaid('balance')"
           >
             수령 완료
           </UButton>
@@ -117,6 +117,29 @@
           <div class="flex justify-end gap-2">
             <UButton variant="ghost" @click="showEdit = false">취소</UButton>
             <UButton @click="saveEdit">저장</UButton>
+          </div>
+        </template>
+      </UModal>
+
+      <!-- 수령 확인 Modal -->
+      <UModal
+        v-model:open="showPaidConfirm"
+        :title="
+          paidConfirmType === 'deposit' ? '선금 수령 확인' : '잔금 수령 확인'
+        "
+      >
+        <template #body>
+          <p class="text-sm text-white">
+            {{ paidConfirmType === 'deposit' ? '선금' : '잔금' }}을 수령 완료
+            처리하시겠습니까?
+          </p>
+        </template>
+        <template #footer>
+          <div class="flex justify-end gap-2">
+            <UButton variant="ghost" @click="showPaidConfirm = false"
+              >취소</UButton
+            >
+            <UButton color="primary" @click="markPaid">확인</UButton>
           </div>
         </template>
       </UModal>
@@ -222,6 +245,8 @@ const project = ref<Project | null>(null);
 const newCheckItem = ref('');
 const isTracking = ref(false);
 const showEdit = ref(false);
+const showPaidConfirm = ref(false);
+const paidConfirmType = ref<'deposit' | 'balance'>('deposit');
 const editForm = reactive({
   contractAmount: 0,
   depositAmount: 0,
@@ -301,7 +326,13 @@ async function saveEdit() {
   showEdit.value = false;
 }
 
-async function markPaid(type: 'deposit' | 'balance') {
+function confirmPaid(type: 'deposit' | 'balance') {
+  paidConfirmType.value = type;
+  showPaidConfirm.value = true;
+}
+
+async function markPaid() {
+  const type = paidConfirmType.value;
   const field = type === 'deposit' ? 'depositPaidAt' : 'balancePaidAt';
   const today = new Date().toISOString();
   await ($api as any)(`/projects/${project.value!.id}`, {
@@ -309,6 +340,7 @@ async function markPaid(type: 'deposit' | 'balance') {
     body: { [field]: today },
   });
   project.value![field] = today;
+  showPaidConfirm.value = false;
 }
 
 async function updateStatus(status: string) {
