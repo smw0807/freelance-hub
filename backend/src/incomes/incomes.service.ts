@@ -8,8 +8,8 @@ import { QueryIncomeDto } from './dto/query-income.dto';
 const PLATFORM_LABEL: Record<string, string> = {
   KMONG: '크몽',
   SOOMGO: '숨고',
-  FREELANCERKOREA: '프리랜서코리아',
-  CREMON: '크리몬',
+  ELANCER: '이랜서',
+  WANTEDGIGS: '원티드 긱스',
   DIRECT: '직접계약',
   OTHER: '기타',
 };
