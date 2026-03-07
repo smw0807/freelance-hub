@@ -13,13 +13,13 @@
 
 ## 기술 스택
 
-| 영역 | 기술 |
-|------|------|
-| 백엔드 | NestJS (TypeScript), Prisma ORM, PostgreSQL (Supabase) |
-| 프론트엔드 | Nuxt 4 (Vue 3), Nuxt UI, Pinia, Tailwind CSS |
-| 인증 | JWT (Access/Refresh), Kakao OAuth 2.0 |
-| PDF | Playwright/Chromium |
-| 패키지 매니저 | Yarn |
+| 영역          | 기술                                                   |
+| ------------- | ------------------------------------------------------ |
+| 백엔드        | NestJS (TypeScript), Prisma ORM, PostgreSQL (Supabase) |
+| 프론트엔드    | Nuxt 4 (Vue 3), Nuxt UI, Pinia, Tailwind CSS           |
+| 인증          | JWT (Access/Refresh), Kakao OAuth 2.0                  |
+| PDF           | Playwright/Chromium                                    |
+| 패키지 매니저 | Yarn                                                   |
 
 ## 프로젝트 구조
 
@@ -95,79 +95,80 @@ yarn prisma migrate dev
 
 ### 인증 `/auth`
 
-| 메서드 | 경로 | 인증 | 설명 |
-|--------|------|------|------|
-| POST | `/auth/register` | ✗ | 이메일 회원가입 |
-| POST | `/auth/login` | ✗ | 이메일 로그인 |
-| POST | `/auth/kakao/code` | ✗ | 카카오 인가코드 → JWT 교환 |
-| POST | `/auth/refresh` | ✗ | Access Token 갱신 |
-| GET | `/auth/me` | ✓ | 내 정보 조회 |
-| POST | `/auth/logout` | ✓ | 로그아웃 (Refresh Token 무효화) |
+| 메서드 | 경로               | 인증 | 설명                            |
+| ------ | ------------------ | ---- | ------------------------------- |
+| POST   | `/auth/register`   | ✗    | 이메일 회원가입                 |
+| POST   | `/auth/login`      | ✗    | 이메일 로그인                   |
+| POST   | `/auth/kakao/code` | ✗    | 카카오 인가코드 → JWT 교환      |
+| POST   | `/auth/refresh`    | ✗    | Access Token 갱신               |
+| GET    | `/auth/me`         | ✓    | 내 정보 조회                    |
+| POST   | `/auth/logout`     | ✓    | 로그아웃 (Refresh Token 무효화) |
 
 ### 클라이언트 `/clients`
 
-| 메서드 | 경로 | 설명 |
-|--------|------|------|
-| GET | `/clients` | 목록 (페이징, 검색, 블랙리스트 필터) |
-| POST | `/clients` | 생성 |
-| GET | `/clients/:id` | 단건 조회 |
-| PATCH | `/clients/:id` | 수정 |
-| DELETE | `/clients/:id` | 삭제 |
-| GET | `/clients/:id/projects` | 해당 클라이언트의 프로젝트 목록 |
-| GET | `/clients/:id/stats` | 통계 (총 프로젝트 수, 완료 수, 총 수입) |
+| 메서드 | 경로                    | 설명                                    |
+| ------ | ----------------------- | --------------------------------------- |
+| GET    | `/clients`              | 목록 (페이징, 검색, 블랙리스트 필터)    |
+| POST   | `/clients`              | 생성                                    |
+| GET    | `/clients/:id`          | 단건 조회                               |
+| PATCH  | `/clients/:id`          | 수정                                    |
+| DELETE | `/clients/:id`          | 삭제                                    |
+| GET    | `/clients/:id/projects` | 해당 클라이언트의 프로젝트 목록         |
+| GET    | `/clients/:id/stats`    | 통계 (총 프로젝트 수, 완료 수, 총 수입) |
 
 ### 프로젝트 `/projects`
 
-| 메서드 | 경로 | 설명 |
-|--------|------|------|
-| GET | `/projects` | 목록 (상태·날짜 필터, 페이징) |
-| POST | `/projects` | 생성 |
-| GET | `/projects/:id` | 단건 조회 (체크리스트·타임로그 포함) |
-| PATCH | `/projects/:id` | 수정 |
-| PATCH | `/projects/:id/status` | 상태만 변경 |
-| DELETE | `/projects/:id` | 삭제 |
-| GET | `/projects/:id/checklist` | 체크리스트 조회 |
-| POST | `/projects/:id/checklist` | 체크리스트 항목 추가 |
-| PATCH | `/projects/:id/checklist/:itemId` | 항목 수정 (완료 토글 등) |
-| DELETE | `/projects/:id/checklist/:itemId` | 항목 삭제 |
-| GET | `/projects/:id/timelogs` | 타임로그 목록 |
-| POST | `/projects/:id/timelogs` | 타임로그 시작 |
-| PATCH | `/projects/:id/timelogs/:logId/stop` | 타임로그 종료 |
+| 메서드 | 경로                                 | 설명                                 |
+| ------ | ------------------------------------ | ------------------------------------ |
+| GET    | `/projects`                          | 목록 (상태·날짜 필터, 페이징)        |
+| POST   | `/projects`                          | 생성                                 |
+| GET    | `/projects/:id`                      | 단건 조회 (체크리스트·타임로그 포함) |
+| PATCH  | `/projects/:id`                      | 수정                                 |
+| PATCH  | `/projects/:id/status`               | 상태만 변경                          |
+| DELETE | `/projects/:id`                      | 삭제                                 |
+| GET    | `/projects/:id/checklist`            | 체크리스트 조회                      |
+| POST   | `/projects/:id/checklist`            | 체크리스트 항목 추가                 |
+| PATCH  | `/projects/:id/checklist/:itemId`    | 항목 수정 (완료 토글 등)             |
+| DELETE | `/projects/:id/checklist/:itemId`    | 항목 삭제                            |
+| GET    | `/projects/:id/timelogs`             | 타임로그 목록                        |
+| POST   | `/projects/:id/timelogs`             | 타임로그 시작                        |
+| PATCH  | `/projects/:id/timelogs/:logId/stop` | 타임로그 종료                        |
 
 ### 견적서 `/quotes`
 
-| 메서드 | 경로 | 인증 | 설명 |
-|--------|------|------|------|
-| GET | `/quotes` | ✓ | 목록 |
-| POST | `/quotes` | ✓ | 생성 |
-| GET | `/quotes/:id` | ✓ | 단건 조회 |
-| PATCH | `/quotes/:id` | ✓ | 수정 |
-| POST | `/quotes/:id/share` | ✓ | 공유 링크 생성 (만료일 설정 가능) |
-| GET | `/quotes/:id/pdf` | ✓ | PDF 다운로드 (Playwright) |
-| GET | `/quotes/public/:token` | ✗ | 공개 견적서 조회 |
-| POST | `/quotes/public/:token/accept` | ✗ | 공개 링크로 수락 |
-| POST | `/quotes/public/:token/reject` | ✗ | 공개 링크로 거절 |
+| 메서드 | 경로                           | 인증 | 설명                              |
+| ------ | ------------------------------ | ---- | --------------------------------- |
+| GET    | `/quotes`                      | ✓    | 목록                              |
+| POST   | `/quotes`                      | ✓    | 생성                              |
+| GET    | `/quotes/:id`                  | ✓    | 단건 조회                         |
+| PATCH  | `/quotes/:id`                  | ✓    | 수정                              |
+| POST   | `/quotes/:id/share`            | ✓    | 공유 링크 생성 (만료일 설정 가능) |
+| GET    | `/quotes/:id/pdf`              | ✓    | PDF 다운로드 (Playwright)         |
+| GET    | `/quotes/public/:token`        | ✗    | 공개 견적서 조회                  |
+| POST   | `/quotes/public/:token/accept` | ✗    | 공개 링크로 수락                  |
+| POST   | `/quotes/public/:token/reject` | ✗    | 공개 링크로 거절                  |
 
 ### 수입 `/incomes`
 
-| 메서드 | 경로 | 설명 |
-|--------|------|------|
-| GET | `/incomes` | 목록 (연도·월 필터) |
-| POST | `/incomes` | 수입 추가 |
-| PATCH | `/incomes/:id` | 수정 |
-| DELETE | `/incomes/:id` | 삭제 |
-| GET | `/incomes/summary` | 이번달·올해 수입 요약 |
-| GET | `/incomes/tax-report` | 연도별 세금 리포트 (원천징수·예상 소득세) |
+| 메서드 | 경로                  | 설명                                      |
+| ------ | --------------------- | ----------------------------------------- |
+| GET    | `/incomes`            | 목록 (연도·월 필터)                       |
+| POST   | `/incomes`            | 수입 추가                                 |
+| PATCH  | `/incomes/:id`        | 수정                                      |
+| DELETE | `/incomes/:id`        | 삭제                                      |
+| GET    | `/incomes/summary`    | 이번달·올해 수입 요약                     |
+| GET    | `/incomes/tax-report` | 연도별 세금 리포트 (원천징수·예상 소득세) |
 
 ### 대시보드
 
-| 메서드 | 경로 | 설명 |
-|--------|------|------|
-| GET | `/dashboard` | 수입 요약, 마감 예정 프로젝트, 미수금 현황 |
+| 메서드 | 경로         | 설명                                       |
+| ------ | ------------ | ------------------------------------------ |
+| GET    | `/dashboard` | 수입 요약, 마감 예정 프로젝트, 미수금 현황 |
 
 ## 인증 플로우
 
 ### 이메일 로그인
+
 ```
 POST /auth/login → { accessToken, refreshToken }
   └─ accessToken: 15분 만료, 모든 API 요청 헤더에 포함
@@ -176,6 +177,7 @@ POST /auth/login → { accessToken, refreshToken }
 ```
 
 ### 카카오 로그인
+
 카카오 Redirect URI가 프론트엔드를 가리키므로, 프론트가 `code`를 받아 백엔드에 전달하는 방식을 사용합니다.
 
 ```
@@ -191,6 +193,7 @@ POST /auth/login → { accessToken, refreshToken }
 Supabase 무료 플랜은 **7일 미사용 시 DB가 자동 일시정지**됩니다.
 
 마이그레이션이나 연결이 실패할 경우:
+
 1. [Supabase Dashboard](https://supabase.com/dashboard)에서 프로젝트를 깨운 후 재시도
 2. **Settings > Database > Connection string** 에서 최신 URL 확인
 3. 비밀번호에 특수문자(`@` 등)가 있으면 URL 인코딩 필요 (`@` → `%40`)
@@ -232,7 +235,7 @@ yarn preview     # 빌드 미리보기
 
 이메일/비밀번호 또는 카카오 소셜 로그인.
 
-![로그인](img/login.png)
+![로그인](img/1.png)
 
 ---
 
@@ -240,7 +243,7 @@ yarn preview     # 빌드 미리보기
 
 이번 달·연간 수입 요약, 최근 6개월 바차트, 마감 예정 프로젝트, 미수금 현황.
 
-![대시보드](img/dashboard.png)
+![대시보드](img/2.png)
 
 ---
 
@@ -248,7 +251,9 @@ yarn preview     # 빌드 미리보기
 
 플랫폼별·블랙리스트 필터, 별점, 거래 통계 제공.
 
-![클라이언트](img/clients.png)
+![클라이언트](img/3.png)
+![클라이언트](img/5.png)
+![클라이언트](img/4.png)
 
 ---
 
@@ -256,7 +261,9 @@ yarn preview     # 빌드 미리보기
 
 계약 금액·선금·잔금 추적, 체크리스트, 타임로그 기록.
 
-![프로젝트](img/projects.png)
+![프로젝트](img/6.png)
+![프로젝트](img/8.png)
+![프로젝트](img/7.png)
 
 ---
 
@@ -264,7 +271,12 @@ yarn preview     # 빌드 미리보기
 
 항목별 견적 작성, 공유 링크 생성, PDF 다운로드.
 
-![견적서](img/quotes.png)
+![견적서](img/9.png)
+![견적서](img/10.png)
+![견적서](img/11.png)
+![견적서](img/12.png)
+![견적서](img/13.png)
+![견적서](img/14.png)
 
 ---
 
@@ -272,7 +284,9 @@ yarn preview     # 빌드 미리보기
 
 수입 내역 관리, 월별·플랫폼별 차트, 원천징수 자동 계산, 연간 리포트 PDF.
 
-![정산/세금](img/incomes.png)
+![정산/세금](img/15.png)
+![정산/세금](img/16.png)
+![정산/세금](img/17.png)
 
 ---
 
