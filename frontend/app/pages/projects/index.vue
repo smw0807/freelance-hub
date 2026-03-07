@@ -33,11 +33,11 @@
             </template>
             <template #status-cell="{ row }">
               <UBadge
-                :color="statusColor(row.original.status)"
+                :color="projectStatusColor[row.original.status]"
                 variant="soft"
                 size="sm"
               >
-                {{ statusLabel(row.original.status) }}
+                {{ projectStatusLabel[row.original.status] }}
               </UBadge>
             </template>
             <template #deadlineAt-cell="{ row }">
@@ -57,7 +57,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Project, ProjectStatus, PaginatedResponse } from '~/types/models';
+import type { Project, PaginatedResponse } from '~/types/models';
 
 definePageMeta({ middleware: 'auth' });
 
@@ -96,34 +96,6 @@ async function fetchProjects() {
   } finally {
     loading.value = false;
   }
-}
-
-const statusLabelMap: Record<ProjectStatus, string> = {
-  INQUIRY: '문의',
-  NEGOTIATING: '협의중',
-  IN_PROGRESS: '진행중',
-  DELIVERED: '납품',
-  COMPLETED: '완료',
-  CANCELLED: '취소',
-};
-
-const statusColorMap: Record<
-  ProjectStatus,
-  'primary' | 'success' | 'error' | 'warning' | 'secondary' | 'info'
-> = {
-  INQUIRY: 'info',
-  NEGOTIATING: 'warning',
-  IN_PROGRESS: 'primary',
-  DELIVERED: 'info',
-  COMPLETED: 'success',
-  CANCELLED: 'error',
-};
-
-function statusLabel(s: ProjectStatus) {
-  return statusLabelMap[s] ?? s;
-}
-function statusColor(s: ProjectStatus) {
-  return statusColorMap[s] ?? 'gray';
 }
 
 onMounted(fetchProjects);

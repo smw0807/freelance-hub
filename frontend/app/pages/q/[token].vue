@@ -13,8 +13,8 @@
               <h2 class="text-xl font-bold">{{ quote.quoteNo }}</h2>
               <p class="text-gray-500 text-sm">{{ quote.project?.title }}</p>
             </div>
-            <UBadge :color="statusColor(quote.status)" size="lg">{{
-              statusLabel(quote.status)
+            <UBadge :color="quoteStatusColor[quote.status]" size="lg">{{
+              quoteStatusLabel[quote.status]
             }}</UBadge>
           </div>
         </template>
@@ -94,7 +94,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Quote, QuoteStatus } from '~/types/models';
+import type { Quote } from '~/types/models';
 
 definePageMeta({ layout: false });
 
@@ -130,27 +130,5 @@ async function respond(action: 'accept' | 'reject') {
   } finally {
     loading.value = null;
   }
-}
-
-const statusLabelMap: Record<QuoteStatus, string> = {
-  DRAFT: '초안',
-  SENT: '검토 대기',
-  ACCEPTED: '수락됨',
-  REJECTED: '거절됨',
-  EXPIRED: '만료됨',
-};
-const statusColorMap: Record<QuoteStatus, string> = {
-  DRAFT: 'gray',
-  SENT: 'primary',
-  ACCEPTED: 'success',
-  REJECTED: 'error',
-  EXPIRED: 'warning',
-};
-
-function statusLabel(s: QuoteStatus) {
-  return statusLabelMap[s] ?? s;
-}
-function statusColor(s: QuoteStatus) {
-  return statusColorMap[s] ?? 'gray';
 }
 </script>

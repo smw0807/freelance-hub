@@ -91,15 +91,6 @@ const loading = ref(false);
 const search = ref('');
 const blacklistFilter = ref('all');
 
-const platformLabel: Record<string, string> = {
-  DIRECT: '직접 계약',
-  KMONG: '크몽',
-  SOOMGO: '숨고',
-  FREELANCERKOREA: '프리랜서코리아',
-  CREMON: '크리몬',
-  OTHER: '기타',
-};
-
 const columns = [
   { accessorKey: 'name', header: '이름' },
   { accessorKey: 'contactName', header: '담당자' },

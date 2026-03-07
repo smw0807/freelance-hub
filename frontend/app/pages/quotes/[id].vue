@@ -8,8 +8,8 @@
           <p class="text-gray-500 text-sm">{{ quote.project?.title }}</p>
         </div>
         <div class="ml-auto flex gap-2">
-          <UBadge :color="statusColor(quote.status)" size="lg">{{
-            statusLabel(quote.status)
+          <UBadge :color="quoteStatusColor[quote.status]" size="lg">{{
+            quoteStatusLabel[quote.status]
           }}</UBadge>
           <UButton
             variant="outline"
@@ -123,7 +123,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Quote, QuoteStatus } from '~/types/models';
+import type { Quote } from '~/types/models';
 
 definePageMeta({ middleware: 'auth' });
 
@@ -173,30 +173,5 @@ async function downloadPdf() {
   a.href = url;
   a.setAttribute('Authorization', `Bearer ${useAuthStore().accessToken}`);
   window.open(url + '?token=' + useAuthStore().accessToken);
-}
-
-const statusLabelMap: Record<QuoteStatus, string> = {
-  DRAFT: '초안',
-  SENT: '발송',
-  ACCEPTED: '수락',
-  REJECTED: '거절',
-  EXPIRED: '만료',
-};
-const statusColorMap: Record<
-  QuoteStatus,
-  'primary' | 'success' | 'error' | 'warning' | 'secondary' | 'info'
-> = {
-  DRAFT: 'info',
-  SENT: 'primary',
-  ACCEPTED: 'success',
-  REJECTED: 'error',
-  EXPIRED: 'warning',
-};
-
-function statusLabel(s: QuoteStatus) {
-  return statusLabelMap[s] ?? s;
-}
-function statusColor(s: QuoteStatus) {
-  return statusColorMap[s] ?? 'info';
 }
 </script>

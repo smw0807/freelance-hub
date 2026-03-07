@@ -24,11 +24,11 @@
           </template>
           <template #status-cell="{ row }">
             <UBadge
-              :color="quoteStatusColor(row.original.status)"
+              :color="quoteStatusColor[row.original.status]"
               variant="soft"
               size="sm"
             >
-              {{ quoteStatusLabel(row.original.status) }}
+              {{ quoteStatusLabel[row.original.status] }}
             </UBadge>
           </template>
           <template #createdAt-cell="{ row }">
@@ -41,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Quote, QuoteStatus } from '~/types/models';
+import type { Quote } from '~/types/models';
 
 definePageMeta({ middleware: 'auth' });
 
@@ -57,31 +57,6 @@ const columns = [
   { accessorKey: 'status', header: '상태' },
   { accessorKey: 'createdAt', header: '발행일' },
 ];
-
-const quoteStatusLabelMap: Record<QuoteStatus, string> = {
-  DRAFT: '초안',
-  SENT: '발송',
-  ACCEPTED: '수락',
-  REJECTED: '거절',
-  EXPIRED: '만료',
-};
-const quoteStatusColorMap: Record<
-  QuoteStatus,
-  'primary' | 'success' | 'error' | 'warning' | 'secondary' | 'info'
-> = {
-  DRAFT: 'info',
-  SENT: 'primary',
-  ACCEPTED: 'success',
-  REJECTED: 'error',
-  EXPIRED: 'warning',
-};
-
-function quoteStatusLabel(s: QuoteStatus) {
-  return quoteStatusLabelMap[s] ?? s;
-}
-function quoteStatusColor(s: QuoteStatus) {
-  return quoteStatusColorMap[s] ?? 'info';
-}
 
 onMounted(async () => {
   loading.value = true;

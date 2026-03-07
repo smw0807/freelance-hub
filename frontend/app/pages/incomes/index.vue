@@ -156,7 +156,6 @@ import type {
   IncomeSummary,
   TaxReport,
   PaginatedResponse,
-  IncomeType,
 } from '~/types/models';
 
 definePageMeta({ middleware: 'auth' });
@@ -212,30 +211,6 @@ const incomeTypeItems = [
   { label: '잔금', value: 'BALANCE' },
   { label: '추가', value: 'EXTRA' },
 ];
-
-const incomeTypeLabel: Record<string, string> = {
-  FULL: '전액',
-  DEPOSIT: '선금',
-  BALANCE: '잔금',
-  EXTRA: '추가',
-};
-
-const incomeTypeColor: Record<
-  IncomeType,
-  | 'primary'
-  | 'info'
-  | 'success'
-  | 'neutral'
-  | 'secondary'
-  | 'warning'
-  | 'error'
-  | undefined
-> = {
-  FULL: 'primary',
-  DEPOSIT: 'info',
-  BALANCE: 'success',
-  EXTRA: 'neutral',
-};
 
 const projectItems = computed(() => [
   { label: '선택...', value: 'none' },
