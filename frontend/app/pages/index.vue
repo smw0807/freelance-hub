@@ -21,7 +21,8 @@
               <UIcon
                 :name="card.icon"
                 class="w-5 h-5"
-                :class="card.iconColor" />
+                :class="card.iconColor"
+              />
             </div>
           </div>
         </UCard>
@@ -40,27 +41,31 @@
           </template>
           <div
             v-if="!dashboard?.upcomingDeadlines?.length"
-            class="text-center text-gray-400 py-6">
+            class="text-center text-gray-400 py-6"
+          >
             이번달 마감 예정 프로젝트가 없습니다.
           </div>
           <div v-else class="space-y-3">
             <div
               v-for="project in dashboard.upcomingDeadlines"
               :key="project.id"
-              class="flex items-center justify-between">
+              class="flex items-center justify-between"
+            >
               <div>
                 <NuxtLink
                   :to="`/projects/${project.id}`"
-                  class="font-medium hover:text-primary-500">
+                  class="font-medium hover:text-primary-500"
+                >
                   {{ project.title }}
                 </NuxtLink>
                 <p class="text-xs text-gray-500">{{ project.client?.name }}</p>
               </div>
               <UBadge
-                :color="deadlineColor(project.deadlineAt)"
+                :color="deadlineColor(project.deadlineAt || '')"
                 variant="soft"
-                size="sm">
-                D-{{ daysLeft(project.deadlineAt) }}
+                size="sm"
+              >
+                D-{{ daysLeft(project.deadlineAt || '') }}
               </UBadge>
             </div>
           </div>
@@ -78,18 +83,21 @@
           </template>
           <div
             v-if="!dashboard?.unpaidProjects?.length"
-            class="text-center text-gray-400 py-6">
+            class="text-center text-gray-400 py-6"
+          >
             미수금이 없습니다.
           </div>
           <div v-else class="space-y-3">
             <div
               v-for="project in dashboard.unpaidProjects"
               :key="project.id"
-              class="flex items-center justify-between">
+              class="flex items-center justify-between"
+            >
               <div>
                 <NuxtLink
                   :to="`/projects/${project.id}`"
-                  class="font-medium hover:text-primary-500">
+                  class="font-medium hover:text-primary-500"
+                >
                   {{ project.title }}
                 </NuxtLink>
                 <p class="text-xs text-gray-500">{{ project.client?.name }}</p>
@@ -106,11 +114,11 @@
 </template>
 
 <script setup lang="ts">
-import type {DashboardData} from '~/types/models';
+import type { DashboardData } from '~/types/models';
 
-definePageMeta({middleware: 'auth'});
+definePageMeta({ middleware: 'auth' });
 
-const {$api} = useNuxtApp();
+const { $api } = useNuxtApp();
 
 const dashboard = ref<DashboardData | null>(null);
 

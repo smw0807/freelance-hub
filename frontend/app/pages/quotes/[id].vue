@@ -15,14 +15,16 @@
             variant="outline"
             size="sm"
             icon="i-heroicons-share"
-            @click="shareModalOpen = true">
+            @click="shareModalOpen = true"
+          >
             공유링크
           </UButton>
           <UButton
             variant="outline"
             size="sm"
             icon="i-heroicons-arrow-down-tray"
-            @click="downloadPdf">
+            @click="downloadPdf"
+          >
             PDF
           </UButton>
         </div>
@@ -110,7 +112,8 @@
           <UButton
             class="w-full justify-center"
             :loading="shareLoading"
-            @click="createShareLink">
+            @click="createShareLink"
+          >
             링크 생성
           </UButton>
         </div>
@@ -120,18 +123,18 @@
 </template>
 
 <script setup lang="ts">
-import type {Quote, QuoteStatus} from '~/types/models';
+import type { Quote, QuoteStatus } from '~/types/models';
 
-definePageMeta({middleware: 'auth'});
+definePageMeta({ middleware: 'auth' });
 
-const {$api} = useNuxtApp();
+const { $api } = useNuxtApp();
 const route = useRoute();
 const config = useRuntimeConfig();
 
 const quote = ref<Quote | null>(null);
 const shareModalOpen = ref(false);
 const shareLoading = ref(false);
-const shareForm = reactive({expiresAt: ''});
+const shareForm = reactive({ expiresAt: '' });
 
 const shareUrl = computed(() =>
   quote.value?.shareToken
@@ -151,9 +154,9 @@ async function createShareLink() {
       body.expiresAt = new Date(shareForm.expiresAt).toISOString();
     const updated = await $api<Partial<Quote>>(
       `/quotes/${quote.value!.id}/share`,
-      {method: 'POST', body},
+      { method: 'POST', body },
     );
-    quote.value = {...quote.value!, ...updated};
+    quote.value = { ...quote.value!, ...updated };
     shareModalOpen.value = false;
   } finally {
     shareLoading.value = false;

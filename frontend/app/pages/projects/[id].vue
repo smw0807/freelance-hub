@@ -19,7 +19,8 @@
             v-model="project.status"
             :items="statusItems"
             size="sm"
-            @update:model-value="updateStatus" />
+            @update:model-value="updateStatus"
+          />
         </div>
       </div>
 
@@ -38,7 +39,8 @@
           </p>
           <p
             class="text-xs"
-            :class="project.depositPaidAt ? 'text-green-500' : 'text-red-400'">
+            :class="project.depositPaidAt ? 'text-green-500' : 'text-red-400'"
+          >
             {{ project.depositPaidAt ? '수령완료' : '미수령' }}
           </p>
           <UButton
@@ -46,7 +48,8 @@
             size="xs"
             variant="soft"
             class="mt-2"
-            @click="markPaid('deposit')">
+            @click="markPaid('deposit')"
+          >
             수령 완료
           </UButton>
         </UCard>
@@ -57,7 +60,8 @@
           </p>
           <p
             class="text-xs"
-            :class="project.balancePaidAt ? 'text-green-500' : 'text-red-400'">
+            :class="project.balancePaidAt ? 'text-green-500' : 'text-red-400'"
+          >
             {{ project.balancePaidAt ? '수령완료' : '미수령' }}
           </p>
           <UButton
@@ -65,7 +69,8 @@
             size="xs"
             variant="soft"
             class="mt-2"
-            @click="markPaid('balance')">
+            @click="markPaid('balance')"
+          >
             수령 완료
           </UButton>
         </UCard>
@@ -128,11 +133,13 @@
                   size="sm"
                   placeholder="새 항목..."
                   @keyup.enter="addCheckItem"
-                  class="w-40" />
+                  class="w-40"
+                />
                 <UButton
                   size="sm"
                   icon="i-heroicons-plus"
-                  @click="addCheckItem" />
+                  @click="addCheckItem"
+                />
               </div>
             </div>
           </template>
@@ -140,11 +147,13 @@
             <div
               v-for="item in project.checklistItems"
               :key="item.id"
-              class="flex items-center gap-3">
+              class="flex items-center gap-3"
+            >
               <UCheckbox
                 :model-value="item.isDone"
-                @update:model-value="toggleCheckItem(item)" />
-              <span :class="{'line-through text-gray-400': item.isDone}">{{
+                @update:model-value="toggleCheckItem(item)"
+              />
+              <span :class="{ 'line-through text-gray-400': item.isDone }">{{
                 item.title
               }}</span>
               <UButton
@@ -152,7 +161,8 @@
                 variant="ghost"
                 size="xs"
                 icon="i-heroicons-x-mark"
-                @click="removeCheckItem(item.id)" />
+                @click="removeCheckItem(item.id)"
+              />
             </div>
           </div>
         </UCard>
@@ -165,7 +175,8 @@
               <UButton
                 size="sm"
                 :icon="isTracking ? 'i-heroicons-stop' : 'i-heroicons-play'"
-                @click="toggleTimer">
+                @click="toggleTimer"
+              >
                 {{ isTracking ? '정지' : '시작' }}
               </UButton>
             </div>
@@ -182,7 +193,8 @@
             <div
               v-for="log in project.timeLogs"
               :key="log.id"
-              class="flex items-center justify-between text-sm">
+              class="flex items-center justify-between text-sm"
+            >
               <span class="text-gray-600">{{ log.description || '작업' }}</span>
               <span class="font-medium">{{
                 log.durationMinutes ? `${log.durationMinutes}분` : '진행중'
@@ -199,11 +211,11 @@
 </template>
 
 <script setup lang="ts">
-import type {Project, ChecklistItem, TimeLog} from '~/types/models';
+import type { Project, ChecklistItem, TimeLog } from '~/types/models';
 
-definePageMeta({middleware: 'auth'});
+definePageMeta({ middleware: 'auth' });
 
-const {$api} = useNuxtApp();
+const { $api } = useNuxtApp();
 const route = useRoute();
 
 const project = ref<Project | null>(null);
@@ -225,12 +237,12 @@ const elapsedTime = ref('00:00:00');
 let timerInterval: ReturnType<typeof setInterval> | null = null;
 
 const statusItems = [
-  {label: '문의', value: 'INQUIRY'},
-  {label: '협의중', value: 'NEGOTIATING'},
-  {label: '진행중', value: 'IN_PROGRESS'},
-  {label: '납품', value: 'DELIVERED'},
-  {label: '완료', value: 'COMPLETED'},
-  {label: '취소', value: 'CANCELLED'},
+  { label: '문의', value: 'INQUIRY' },
+  { label: '협의중', value: 'NEGOTIATING' },
+  { label: '진행중', value: 'IN_PROGRESS' },
+  { label: '납품', value: 'DELIVERED' },
+  { label: '완료', value: 'COMPLETED' },
+  { label: '취소', value: 'CANCELLED' },
 ];
 
 const totalMinutes = computed(
@@ -294,7 +306,7 @@ async function markPaid(type: 'deposit' | 'balance') {
   const today = new Date().toISOString();
   await ($api as any)(`/projects/${project.value!.id}`, {
     method: 'PATCH',
-    body: {[field]: today},
+    body: { [field]: today },
   });
   project.value![field] = today;
 }
@@ -302,7 +314,7 @@ async function markPaid(type: 'deposit' | 'balance') {
 async function updateStatus(status: string) {
   await ($api as any)(`/projects/${project.value!.id}/status`, {
     method: 'PATCH',
-    body: {status},
+    body: { status },
   });
 }
 
@@ -312,7 +324,7 @@ async function addCheckItem() {
     `/projects/${project.value!.id}/checklist`,
     {
       method: 'POST',
-      body: {title: newCheckItem.value},
+      body: { title: newCheckItem.value },
     },
   );
   project.value!.checklistItems.push(item);
@@ -323,7 +335,7 @@ async function toggleCheckItem(item: ChecklistItem) {
   item.isDone = !item.isDone;
   await $api(`/projects/${project.value!.id}/checklist/${item.id}`, {
     method: 'PATCH',
-    body: {isDone: item.isDone},
+    body: { isDone: item.isDone },
   });
 }
 
@@ -342,7 +354,7 @@ async function toggleTimer() {
     // Start
     const log = await $api<TimeLog>(`/projects/${id}/timelogs`, {
       method: 'POST',
-      body: {startedAt: new Date().toISOString()},
+      body: { startedAt: new Date().toISOString() },
     });
     activeLogId.value = log.id;
     timerStart.value = new Date();
@@ -362,7 +374,7 @@ async function toggleTimer() {
     timerInterval = null;
     const log = await $api<TimeLog>(
       `/projects/${id}/timelogs/${activeLogId.value}/stop`,
-      {method: 'PATCH'},
+      { method: 'PATCH' },
     );
     project.value!.timeLogs.unshift(log);
     isTracking.value = false;

@@ -12,32 +12,37 @@
             <UInput
               v-model="form.title"
               placeholder="프로젝트 제목"
-              class="w-full" />
+              class="w-full"
+            />
           </UFormField>
           <div class="grid grid-cols-2 gap-4">
             <UFormField label="클라이언트" name="clientId">
               <USelect
                 v-model="form.clientId"
                 :items="clientItems"
-                class="w-full" />
+                class="w-full"
+              />
             </UFormField>
             <UFormField label="상태" name="status">
               <USelect
                 v-model="form.status"
                 :items="statusItems"
-                class="w-full" />
+                class="w-full"
+              />
             </UFormField>
             <UFormField label="계약금액" name="contractAmount">
               <UInput
                 v-model.number="form.contractAmount"
                 type="number"
-                class="w-full" />
+                class="w-full"
+              />
             </UFormField>
             <UFormField label="플랫폼" name="platform">
               <USelect
                 v-model="form.platform"
                 :items="platformItems"
-                class="w-full" />
+                class="w-full"
+              />
             </UFormField>
             <UFormField label="시작일" name="startedAt">
               <UInput v-model="form.startedAt" type="date" class="w-full" />
@@ -49,13 +54,15 @@
               <UInput
                 v-model.number="form.depositAmount"
                 type="number"
-                class="w-full" />
+                class="w-full"
+              />
             </UFormField>
             <UFormField label="잔금" name="balanceAmount">
               <UInput
                 v-model.number="form.balanceAmount"
                 type="number"
-                class="w-full" />
+                class="w-full"
+              />
             </UFormField>
           </div>
           <UFormField label="메모" name="memo">
@@ -75,11 +82,11 @@
 </template>
 
 <script setup lang="ts">
-import type {Client, Project, PaginatedResponse} from '~/types/models';
+import type { Client, Project, PaginatedResponse } from '~/types/models';
 
-definePageMeta({middleware: 'auth'});
+definePageMeta({ middleware: 'auth' });
 
-const {$api} = useNuxtApp();
+const { $api } = useNuxtApp();
 const route = useRoute();
 
 const form = reactive({
@@ -100,23 +107,23 @@ const error = ref('');
 const clients = ref<Client[]>([]);
 
 const clientItems = computed(() => [
-  {label: '선택 안 함', value: 'none'},
-  ...clients.value.map((c) => ({label: c.name, value: c.id})),
+  { label: '선택 안 함', value: 'none' },
+  ...clients.value.map((c) => ({ label: c.name, value: c.id })),
 ]);
 
 const statusItems = [
-  {label: '문의', value: 'INQUIRY'},
-  {label: '협의중', value: 'NEGOTIATING'},
-  {label: '진행중', value: 'IN_PROGRESS'},
+  { label: '문의', value: 'INQUIRY' },
+  { label: '협의중', value: 'NEGOTIATING' },
+  { label: '진행중', value: 'IN_PROGRESS' },
 ];
 
 const platformItems = [
-  {label: '직접 계약', value: 'DIRECT'},
-  {label: '크몽', value: 'KMONG'},
-  {label: '숨고', value: 'SOOMGO'},
-  {label: '프리랜서코리아', value: 'FREELANCERKOREA'},
-  {label: '크리몬', value: 'CREMON'},
-  {label: '기타', value: 'OTHER'},
+  { label: '직접 계약', value: 'DIRECT' },
+  { label: '크몽', value: 'KMONG' },
+  { label: '숨고', value: 'SOOMGO' },
+  { label: '프리랜서코리아', value: 'FREELANCERKOREA' },
+  { label: '크리몬', value: 'CREMON' },
+  { label: '기타', value: 'OTHER' },
 ];
 
 onMounted(async () => {
@@ -132,7 +139,7 @@ async function onSubmit() {
   loading.value = true;
   error.value = '';
   try {
-    const body: Record<string, unknown> = {...form};
+    const body: Record<string, unknown> = { ...form };
     if (!body.clientId || body.clientId === 'none') delete body.clientId;
     if (!body.startedAt) delete body.startedAt;
     if (!body.deadlineAt) delete body.deadlineAt;
@@ -143,7 +150,7 @@ async function onSubmit() {
     await navigateTo(`/projects/${project.id}`);
   } catch (err: unknown) {
     error.value =
-      (err as {data?: {message?: string}})?.data?.message ||
+      (err as { data?: { message?: string } })?.data?.message ||
       '저장에 실패했습니다.';
   } finally {
     loading.value = false;

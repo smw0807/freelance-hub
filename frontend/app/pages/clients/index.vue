@@ -14,27 +14,30 @@
           placeholder="이름, 이메일 검색..."
           icon="i-heroicons-magnifying-glass"
           class="flex-1"
-          @input="debouncedFetch" />
+          @input="debouncedFetch"
+        />
         <USelect
           v-model="blacklistFilter"
           :items="[
-            {label: '전체', value: 'all'},
-            {label: '블랙리스트 제외', value: 'false'},
-            {label: '블랙리스트만', value: 'true'},
+            { label: '전체', value: 'all' },
+            { label: '블랙리스트 제외', value: 'false' },
+            { label: '블랙리스트만', value: 'true' },
           ]"
-          @update:model-value="fetchClients" />
+          @update:model-value="fetchClients"
+        />
       </div>
 
-      <UCard :ui="{body: 'p-0'}">
+      <UCard :ui="{ body: 'p-0' }">
         <UTable :data="clients" :columns="columns" :loading="loading">
-          <template #name-cell="{row}">
+          <template #name-cell="{ row }">
             <NuxtLink
               :to="`/clients/${row.original.id}`"
-              class="font-medium hover:text-primary-500">
+              class="font-medium hover:text-primary-500"
+            >
               {{ row.original.name }}
             </NuxtLink>
           </template>
-          <template #isBlacklisted-cell="{row}">
+          <template #isBlacklisted-cell="{ row }">
             <UBadge
               v-if="row.original.isBlacklisted"
               color="error"
@@ -43,20 +46,21 @@
               >블랙리스트</UBadge
             >
           </template>
-          <template #platform-cell="{row}">
+          <template #platform-cell="{ row }">
             <UBadge v-if="row.original.platform" variant="outline" size="sm">
               {{
                 platformLabel[row.original.platform] ?? row.original.platform
               }}
             </UBadge>
           </template>
-          <template #actions-cell="{row}">
+          <template #actions-cell="{ row }">
             <UButton
               variant="ghost"
               size="xs"
               icon="i-heroicons-trash"
               color="error"
-              @click="deleteClient(row.original.id)" />
+              @click="deleteClient(row.original.id)"
+            />
           </template>
         </UTable>
       </UCard>
@@ -66,18 +70,19 @@
           v-model:page="page"
           :total="total"
           :items-per-page="20"
-          @update:page="fetchClients" />
+          @update:page="fetchClients"
+        />
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import {useDebounceFn} from '@vueuse/core';
+import { useDebounceFn } from '@vueuse/core';
 
-definePageMeta({middleware: 'auth'});
+definePageMeta({ middleware: 'auth' });
 
-const {$api} = useNuxtApp();
+const { $api } = useNuxtApp();
 
 const clients = ref<Client[]>([]);
 const total = ref(0);
@@ -96,18 +101,18 @@ const platformLabel: Record<string, string> = {
 };
 
 const columns = [
-  {accessorKey: 'name', header: '이름'},
-  {accessorKey: 'contactName', header: '담당자'},
-  {accessorKey: 'phone', header: '연락처'},
-  {accessorKey: 'platform', header: '플랫폼'},
-  {accessorKey: 'isBlacklisted', header: '상태'},
-  {id: 'actions', header: ''},
+  { accessorKey: 'name', header: '이름' },
+  { accessorKey: 'contactName', header: '담당자' },
+  { accessorKey: 'phone', header: '연락처' },
+  { accessorKey: 'platform', header: '플랫폼' },
+  { accessorKey: 'isBlacklisted', header: '상태' },
+  { id: 'actions', header: '' },
 ];
 
 async function fetchClients() {
   loading.value = true;
   try {
-    const params: any = {page: page.value};
+    const params: any = { page: page.value };
     if (search.value) params.search = search.value;
     if (blacklistFilter.value !== 'all')
       params.isBlacklisted = blacklistFilter.value;
@@ -125,7 +130,7 @@ const debouncedFetch = useDebounceFn(fetchClients, 300);
 
 async function deleteClient(id: string) {
   if (!confirm('정말 삭제하시겠습니까?')) return;
-  await ($api as any)(`/clients/${id}`, {method: 'DELETE'});
+  await ($api as any)(`/clients/${id}`, { method: 'DELETE' });
   fetchClients();
 }
 

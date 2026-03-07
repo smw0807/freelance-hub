@@ -13,22 +13,52 @@
               <UInput v-model="form.name" placeholder="업체명" class="w-full" />
             </UFormField>
             <UFormField label="담당자" name="contactName">
-              <UInput v-model="form.contactName" placeholder="담당자 이름" class="w-full" />
+              <UInput
+                v-model="form.contactName"
+                placeholder="담당자 이름"
+                class="w-full"
+              />
             </UFormField>
             <UFormField label="이메일" name="email">
-              <UInput v-model="form.email" type="email" placeholder="email@example.com" class="w-full" />
+              <UInput
+                v-model="form.email"
+                type="email"
+                placeholder="email@example.com"
+                class="w-full"
+              />
             </UFormField>
             <UFormField label="전화번호" name="phone">
-              <UInput v-model="form.phone" placeholder="010-0000-0000" class="w-full" />
+              <UInput
+                v-model="form.phone"
+                placeholder="010-0000-0000"
+                class="w-full"
+              />
             </UFormField>
             <UFormField label="플랫폼" name="platform">
-              <USelect v-model="form.platform" :items="platformItems" class="w-full" />
+              <USelect
+                v-model="form.platform"
+                :items="platformItems"
+                class="w-full"
+              />
             </UFormField>
             <UFormField label="사업자번호" name="businessNo">
-              <UInput v-model="form.businessNo" placeholder="000-00-00000" class="w-full" />
+              <UInput
+                v-model="form.businessNo"
+                placeholder="000-00-00000"
+                class="w-full"
+              />
             </UFormField>
             <UFormField label="평점" name="rating">
-              <USelect v-model="form.rating" :items="[1,2,3,4,5].map(n => ({ label: '★'.repeat(n), value: n }))" class="w-full" />
+              <USelect
+                v-model="form.rating"
+                :items="
+                  [1, 2, 3, 4, 5].map((n) => ({
+                    label: '★'.repeat(n),
+                    value: n,
+                  }))
+                "
+                class="w-full"
+              />
             </UFormField>
           </div>
           <UFormField label="메모" name="memo">
@@ -48,9 +78,9 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ middleware: 'auth' })
+definePageMeta({ middleware: 'auth' });
 
-const { $api } = useNuxtApp()
+const { $api } = useNuxtApp();
 
 const form = reactive({
   name: '',
@@ -61,10 +91,10 @@ const form = reactive({
   businessNo: '',
   rating: undefined as number | undefined,
   memo: '',
-})
+});
 
-const loading = ref(false)
-const error = ref('')
+const loading = ref(false);
+const error = ref('');
 
 const platformItems = [
   { label: '직접 계약', value: 'DIRECT' },
@@ -73,19 +103,22 @@ const platformItems = [
   { label: '프리랜서코리아', value: 'FREELANCERKOREA' },
   { label: '크리몬', value: 'CREMON' },
   { label: '기타', value: 'OTHER' },
-]
+];
 
 async function onSubmit() {
-  if (!form.name) { error.value = '업체명은 필수입니다.'; return }
-  loading.value = true
-  error.value = ''
+  if (!form.name) {
+    error.value = '업체명은 필수입니다.';
+    return;
+  }
+  loading.value = true;
+  error.value = '';
   try {
-    await ($api as any)('/clients', { method: 'POST', body: form })
-    await navigateTo('/clients')
+    await ($api as any)('/clients', { method: 'POST', body: form });
+    await navigateTo('/clients');
   } catch (err: any) {
-    error.value = err?.data?.message || '저장에 실패했습니다.'
+    error.value = err?.data?.message || '저장에 실패했습니다.';
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 </script>

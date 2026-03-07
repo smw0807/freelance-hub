@@ -9,7 +9,9 @@
         </div>
         <div class="ml-auto flex gap-2">
           <UBadge v-if="client.isBlacklisted" color="error">블랙리스트</UBadge>
-          <UButton variant="outline" size="sm" @click="showEdit = true">편집</UButton>
+          <UButton variant="outline" size="sm" @click="showEdit = true"
+            >편집</UButton
+          >
         </div>
       </div>
 
@@ -25,7 +27,9 @@
         </UCard>
         <UCard>
           <p class="text-sm text-gray-500">총 수입</p>
-          <p class="text-2xl font-bold">₩{{ stats.totalRevenue.toLocaleString() }}</p>
+          <p class="text-2xl font-bold">
+            ₩{{ stats.totalRevenue.toLocaleString() }}
+          </p>
         </UCard>
       </div>
 
@@ -33,13 +37,30 @@
       <UCard>
         <template #header><h2 class="font-semibold">기본 정보</h2></template>
         <dl class="grid grid-cols-2 gap-3 text-sm">
-          <div><dt class="text-gray-500">이메일</dt><dd>{{ client.email || '-' }}</dd></div>
-          <div><dt class="text-gray-500">전화</dt><dd>{{ client.phone || '-' }}</dd></div>
-          <div><dt class="text-gray-500">플랫폼</dt><dd>{{ client.platform }}</dd></div>
-          <div><dt class="text-gray-500">사업자번호</dt><dd>{{ client.businessNo || '-' }}</dd></div>
-          <div><dt class="text-gray-500">평점</dt><dd>{{ client.rating ? '★'.repeat(client.rating) : '-' }}</dd></div>
+          <div>
+            <dt class="text-gray-500">이메일</dt>
+            <dd>{{ client.email || '-' }}</dd>
+          </div>
+          <div>
+            <dt class="text-gray-500">전화</dt>
+            <dd>{{ client.phone || '-' }}</dd>
+          </div>
+          <div>
+            <dt class="text-gray-500">플랫폼</dt>
+            <dd>{{ client.platform }}</dd>
+          </div>
+          <div>
+            <dt class="text-gray-500">사업자번호</dt>
+            <dd>{{ client.businessNo || '-' }}</dd>
+          </div>
+          <div>
+            <dt class="text-gray-500">평점</dt>
+            <dd>{{ client.rating ? '★'.repeat(client.rating) : '-' }}</dd>
+          </div>
         </dl>
-        <p v-if="client.memo" class="mt-3 text-sm text-gray-600 border-t pt-3">{{ client.memo }}</p>
+        <p v-if="client.memo" class="mt-3 text-sm text-gray-600 border-t pt-3">
+          {{ client.memo }}
+        </p>
       </UCard>
 
       <!-- Projects -->
@@ -47,10 +68,18 @@
         <template #header>
           <div class="flex items-center justify-between">
             <h2 class="font-semibold">프로젝트 히스토리</h2>
-            <UButton :to="`/projects/new?clientId=${client.id}`" size="sm" variant="outline" icon="i-heroicons-plus">새 프로젝트</UButton>
+            <UButton
+              :to="`/projects/new?clientId=${client.id}`"
+              size="sm"
+              variant="outline"
+              icon="i-heroicons-plus"
+              >새 프로젝트</UButton
+            >
           </div>
         </template>
-        <div v-if="!projects.length" class="text-center text-gray-400 py-6">프로젝트가 없습니다.</div>
+        <div v-if="!projects.length" class="text-center text-gray-400 py-6">
+          프로젝트가 없습니다.
+        </div>
         <div v-else class="space-y-2">
           <NuxtLink
             v-for="project in projects"
@@ -60,9 +89,15 @@
           >
             <div>
               <p class="font-medium">{{ project.title }}</p>
-              <p class="text-xs text-gray-500">{{ formatDate(project.createdAt) }}</p>
+              <p class="text-xs text-gray-500">
+                {{ formatDate(project.createdAt) }}
+              </p>
             </div>
-            <UBadge :color="statusColor(project.status)" variant="soft" size="sm">
+            <UBadge
+              :color="statusColor(project.status)"
+              variant="soft"
+              size="sm"
+            >
               {{ statusLabel(project.status) }}
             </UBadge>
           </NuxtLink>
@@ -73,41 +108,58 @@
 </template>
 
 <script setup lang="ts">
-import type { Client, Project, ClientStats, ProjectStatus } from '~/types/models'
+import type {
+  Client,
+  Project,
+  ClientStats,
+  ProjectStatus,
+} from '~/types/models';
 
-definePageMeta({ middleware: 'auth' })
+definePageMeta({ middleware: 'auth' });
 
-const { $api } = useNuxtApp()
-const route = useRoute()
+const { $api } = useNuxtApp();
+const route = useRoute();
 
-const client = ref<Client | null>(null)
-const projects = ref<Project[]>([])
-const stats = ref<ClientStats | null>(null)
-const showEdit = ref(false)
+const client = ref<Client | null>(null);
+const projects = ref<Project[]>([]);
+const stats = ref<ClientStats | null>(null);
+const showEdit = ref(false);
 
 onMounted(async () => {
-  const id = route.params.id as string
-  ;[client.value, projects.value, stats.value] = await Promise.all([
+  const id = route.params.id as string;
+  [client.value, projects.value, stats.value] = await Promise.all([
     ($api as any)<Client>(`/clients/${id}`),
     ($api as any)<Project[]>(`/clients/${id}/projects`),
     ($api as any)<ClientStats>(`/clients/${id}/stats`),
-  ])
-})
+  ]);
+});
 
 function formatDate(d: string) {
-  return new Date(d).toLocaleDateString('ko-KR')
+  return new Date(d).toLocaleDateString('ko-KR');
 }
 
 const statusLabelMap: Record<ProjectStatus, string> = {
-  INQUIRY: '문의', NEGOTIATING: '협의중', IN_PROGRESS: '진행중',
-  DELIVERED: '납품', COMPLETED: '완료', CANCELLED: '취소',
-}
+  INQUIRY: '문의',
+  NEGOTIATING: '협의중',
+  IN_PROGRESS: '진행중',
+  DELIVERED: '납품',
+  COMPLETED: '완료',
+  CANCELLED: '취소',
+};
 
 const statusColorMap: Record<ProjectStatus, string> = {
-  INQUIRY: 'gray', NEGOTIATING: 'warning', IN_PROGRESS: 'primary',
-  DELIVERED: 'info', COMPLETED: 'success', CANCELLED: 'error',
-}
+  INQUIRY: 'gray',
+  NEGOTIATING: 'warning',
+  IN_PROGRESS: 'primary',
+  DELIVERED: 'info',
+  COMPLETED: 'success',
+  CANCELLED: 'error',
+};
 
-function statusLabel(s: ProjectStatus) { return statusLabelMap[s] ?? s }
-function statusColor(s: ProjectStatus) { return statusColorMap[s] ?? 'gray' }
+function statusLabel(s: ProjectStatus) {
+  return statusLabelMap[s] ?? s;
+}
+function statusColor(s: ProjectStatus) {
+  return statusColorMap[s] ?? 'gray';
+}
 </script>

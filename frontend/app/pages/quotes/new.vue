@@ -14,7 +14,8 @@
             <USelect
               v-model="form.projectId"
               :items="projectItems"
-              class="w-full" />
+              class="w-full"
+            />
           </div>
 
           <!-- Step 2: Items -->
@@ -33,21 +34,25 @@
               <div
                 v-for="(item, i) in form.items"
                 :key="i"
-                class="grid grid-cols-12 gap-2 items-center">
+                class="grid grid-cols-12 gap-2 items-center"
+              >
                 <UInput
                   v-model="item.description"
                   placeholder="항목명"
-                  class="col-span-5" />
+                  class="col-span-5"
+                />
                 <UInput
                   v-model.number="item.quantity"
                   type="number"
                   placeholder="수량"
-                  class="col-span-2" />
+                  class="col-span-2"
+                />
                 <UInput
                   v-model.number="item.unitPrice"
                   type="number"
                   placeholder="단가"
-                  class="col-span-3" />
+                  class="col-span-3"
+                />
                 <div class="col-span-1 text-right text-sm">
                   ₩{{ (item.amount || 0).toLocaleString() }}
                 </div>
@@ -56,7 +61,8 @@
                   variant="ghost"
                   icon="i-heroicons-x-mark"
                   size="xs"
-                  @click="removeItem(i)" />
+                  @click="removeItem(i)"
+                />
               </div>
             </div>
           </div>
@@ -79,7 +85,8 @@
                   v-model.number="form.discountAmount"
                   type="number"
                   size="sm"
-                  class="w-32" />
+                  class="w-32"
+                />
               </div>
               <div class="flex justify-between font-bold border-t pt-2">
                 <span>합계</span>
@@ -94,7 +101,8 @@
             <UTextarea
               v-model="form.memo"
               placeholder="특이사항, 유효기간 등"
-              class="w-full" />
+              class="w-full"
+            />
           </div>
 
           <UAlert v-if="error" color="error" :description="error" />
@@ -110,11 +118,11 @@
 </template>
 
 <script setup lang="ts">
-import type {Project, Quote, PaginatedResponse} from '~/types/models';
+import type { Project, Quote, PaginatedResponse } from '~/types/models';
 
-definePageMeta({middleware: 'auth'});
+definePageMeta({ middleware: 'auth' });
 
-const {$api} = useNuxtApp();
+const { $api } = useNuxtApp();
 
 const projects = ref<Project[]>([]);
 const loading = ref(false);
@@ -123,7 +131,7 @@ const includeVat = ref(false);
 
 const form = reactive({
   projectId: 'none',
-  items: [{description: '', quantity: 1, unitPrice: 0, amount: 0}],
+  items: [{ description: '', quantity: 1, unitPrice: 0, amount: 0 }],
   subtotal: 0,
   vatAmount: 0,
   discountAmount: 0,
@@ -132,11 +140,11 @@ const form = reactive({
 });
 
 const projectItems = computed(() => [
-  {label: '선택...', value: 'none'},
-  ...projects.value.map((p) => ({label: p.title, value: p.id})),
+  { label: '선택...', value: 'none' },
+  ...projects.value.map((p) => ({ label: p.title, value: p.id })),
 ]);
 
-watch(() => form.items, recalculate, {deep: true});
+watch(() => form.items, recalculate, { deep: true });
 watch([() => form.discountAmount, includeVat], recalculate);
 
 onMounted(async () => {
@@ -145,7 +153,7 @@ onMounted(async () => {
 });
 
 function addItem() {
-  form.items.push({description: '', quantity: 1, unitPrice: 0, amount: 0});
+  form.items.push({ description: '', quantity: 1, unitPrice: 0, amount: 0 });
 }
 
 function removeItem(i: number) {
@@ -172,11 +180,11 @@ async function onSubmit() {
   error.value = '';
   try {
     recalculate();
-    const quote = await $api<Quote>('/quotes', {method: 'POST', body: form});
+    const quote = await $api<Quote>('/quotes', { method: 'POST', body: form });
     await navigateTo(`/quotes/${quote.id}`);
   } catch (err: unknown) {
     error.value =
-      (err as {data?: {message?: string}})?.data?.message ||
+      (err as { data?: { message?: string } })?.data?.message ||
       '저장에 실패했습니다.';
   } finally {
     loading.value = false;

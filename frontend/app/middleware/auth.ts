@@ -1,16 +1,20 @@
 export default defineNuxtRouteMiddleware((to) => {
-  if (import.meta.server) return
+  if (import.meta.server) return;
 
-  const authStore = useAuthStore()
+  const authStore = useAuthStore();
 
-  const publicRoutes = ['/auth/login', '/auth/register', '/auth/kakao/callback']
-  const isPublicQuote = to.path.startsWith('/q/')
+  const publicRoutes = [
+    '/auth/login',
+    '/auth/register',
+    '/auth/kakao/callback',
+  ];
+  const isPublicQuote = to.path.startsWith('/q/');
 
   if (isPublicQuote || publicRoutes.includes(to.path)) {
-    return
+    return;
   }
 
   if (!authStore.isAuthenticated) {
-    return navigateTo('/auth/login')
+    return navigateTo('/auth/login');
   }
-})
+});

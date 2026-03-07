@@ -41,36 +41,39 @@
         <USelect
           v-model="filterYear"
           :items="yearItems"
-          @update:model-value="fetchAll" />
+          @update:model-value="fetchAll"
+        />
         <USelect
           v-model="filterMonth"
           :items="monthItems"
-          @update:model-value="fetchIncomes" />
+          @update:model-value="fetchIncomes"
+        />
       </div>
 
       <!-- Income list -->
-      <UCard :ui="{body: 'p-0'}">
+      <UCard :ui="{ body: 'p-0' }">
         <UTable :data="incomes" :columns="columns" :loading="loading">
-          <template #project-cell="{row}">{{
+          <template #project-cell="{ row }">{{
             row.original.project?.title
           }}</template>
-          <template #incomeType-cell="{row}">
+          <template #incomeType-cell="{ row }">
             <UBadge
               :color="incomeTypeColor[row.original.incomeType]"
               variant="soft"
-              size="sm">
+              size="sm"
+            >
               {{ incomeTypeLabel[row.original.incomeType] }}
             </UBadge>
           </template>
-          <template #amount-cell="{row}"
+          <template #amount-cell="{ row }"
             >₩{{ row.original.amount.toLocaleString() }}</template
           >
-          <template #netAmount-cell="{row}">
+          <template #netAmount-cell="{ row }">
             <span class="font-medium text-green-600"
               >₩{{ row.original.netAmount.toLocaleString() }}</span
             >
           </template>
-          <template #isWithholdingTax-cell="{row}">
+          <template #isWithholdingTax-cell="{ row }">
             <UBadge
               v-if="row.original.isWithholdingTax"
               color="warning"
@@ -80,16 +83,17 @@
             >
             <span v-else class="text-gray-400 text-sm">-</span>
           </template>
-          <template #paidAt-cell="{row}">{{
+          <template #paidAt-cell="{ row }">{{
             new Date(row.original.paidAt).toLocaleDateString('ko-KR')
           }}</template>
-          <template #actions-cell="{row}">
+          <template #actions-cell="{ row }">
             <UButton
               variant="ghost"
               size="xs"
               icon="i-heroicons-trash"
               color="error"
-              @click="deleteIncome(row.original.id)" />
+              @click="deleteIncome(row.original.id)"
+            />
           </template>
         </UTable>
       </UCard>
@@ -103,19 +107,22 @@
             <USelect
               v-model="addForm.projectId"
               :items="projectItems"
-              class="w-full" />
+              class="w-full"
+            />
           </UFormField>
           <UFormField label="유형">
             <USelect
               v-model="addForm.incomeType"
               :items="incomeTypeItems"
-              class="w-full" />
+              class="w-full"
+            />
           </UFormField>
           <UFormField label="금액 *">
             <UInput
               v-model.number="addForm.amount"
               type="number"
-              class="w-full" />
+              class="w-full"
+            />
           </UFormField>
           <UFormField label="지급일 *">
             <UInput v-model="addForm.paidAt" type="date" class="w-full" />
@@ -123,7 +130,8 @@
           <UFormField label="원천징수">
             <UCheckbox
               v-model="addForm.isWithholdingTax"
-              label="원천징수 적용 (3.3%)" />
+              label="원천징수 적용 (3.3%)"
+            />
           </UFormField>
           <UFormField label="메모">
             <UInput v-model="addForm.memo" class="w-full" />
@@ -150,9 +158,9 @@ import type {
   PaginatedResponse,
 } from '~/types/models';
 
-definePageMeta({middleware: 'auth'});
+definePageMeta({ middleware: 'auth' });
 
-const {$api} = useNuxtApp();
+const { $api } = useNuxtApp();
 
 const incomes = ref<Income[]>([]);
 const summary = ref<IncomeSummary | null>(null);
@@ -175,33 +183,33 @@ const addForm = reactive({
 });
 
 const columns = [
-  {accessorKey: 'project', header: '프로젝트'},
-  {accessorKey: 'incomeType', header: '유형'},
-  {accessorKey: 'amount', header: '금액'},
-  {accessorKey: 'netAmount', header: '실수령'},
-  {accessorKey: 'isWithholdingTax', header: '원천징수'},
-  {accessorKey: 'paidAt', header: '지급일'},
-  {id: 'actions', header: ''},
+  { accessorKey: 'project', header: '프로젝트' },
+  { accessorKey: 'incomeType', header: '유형' },
+  { accessorKey: 'amount', header: '금액' },
+  { accessorKey: 'netAmount', header: '실수령' },
+  { accessorKey: 'isWithholdingTax', header: '원천징수' },
+  { accessorKey: 'paidAt', header: '지급일' },
+  { id: 'actions', header: '' },
 ];
 
-const yearItems = Array.from({length: 5}, (_, i) => {
+const yearItems = Array.from({ length: 5 }, (_, i) => {
   const y = new Date().getFullYear() - i;
-  return {label: `${y}년`, value: String(y)};
+  return { label: `${y}년`, value: String(y) };
 });
 
 const monthItems = [
-  {label: '전체', value: 'all'},
-  ...Array.from({length: 12}, (_, i) => ({
+  { label: '전체', value: 'all' },
+  ...Array.from({ length: 12 }, (_, i) => ({
     label: `${i + 1}월`,
     value: String(i + 1),
   })),
 ];
 
 const incomeTypeItems = [
-  {label: '전액', value: 'FULL'},
-  {label: '선금', value: 'DEPOSIT'},
-  {label: '잔금', value: 'BALANCE'},
-  {label: '추가', value: 'EXTRA'},
+  { label: '전액', value: 'FULL' },
+  { label: '선금', value: 'DEPOSIT' },
+  { label: '잔금', value: 'BALANCE' },
+  { label: '추가', value: 'EXTRA' },
 ];
 
 const incomeTypeLabel: Record<string, string> = {
@@ -219,8 +227,8 @@ const incomeTypeColor: Record<string, string> = {
 };
 
 const projectItems = computed(() => [
-  {label: '선택...', value: 'none'},
-  ...projects.value.map((p) => ({label: p.title, value: p.id})),
+  { label: '선택...', value: 'none' },
+  ...projects.value.map((p) => ({ label: p.title, value: p.id })),
 ]);
 
 async function fetchIncomes() {
@@ -254,7 +262,7 @@ async function fetchAll() {
 
 async function deleteIncome(id: string) {
   if (!confirm('삭제하시겠습니까?')) return;
-  await ($api as any)(`/incomes/${id}`, {method: 'DELETE'});
+  await ($api as any)(`/incomes/${id}`, { method: 'DELETE' });
   fetchIncomes();
 }
 
@@ -266,12 +274,12 @@ async function addIncome() {
   addLoading.value = true;
   addError.value = '';
   try {
-    await ($api as any)('/incomes', {method: 'POST', body: addForm});
+    await ($api as any)('/incomes', { method: 'POST', body: addForm });
     addModalOpen.value = false;
     fetchAll();
   } catch (err: unknown) {
     addError.value =
-      (err as {data?: {message?: string}})?.data?.message ||
+      (err as { data?: { message?: string } })?.data?.message ||
       '저장에 실패했습니다.';
   } finally {
     addLoading.value = false;

@@ -3,14 +3,15 @@
     <div class="text-center">
       <UIcon
         name="i-heroicons-arrow-path"
-        class="w-10 h-10 animate-spin text-primary-500 mx-auto" />
+        class="w-10 h-10 animate-spin text-primary-500 mx-auto"
+      />
       <p class="mt-3 text-gray-600">카카오 로그인 처리 중...</p>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-definePageMeta({layout: false});
+definePageMeta({ layout: false });
 
 const route = useRoute();
 const authStore = useAuthStore();
@@ -22,12 +23,12 @@ onMounted(async () => {
     return;
   }
 
-  const {$api} = useNuxtApp();
+  const { $api } = useNuxtApp();
   const redirectUri = `${window.location.origin}/auth/kakao/callback`;
 
   const data = await $api('/auth/kakao/code', {
     method: 'POST',
-    body: {code, redirectUri},
+    body: { code, redirectUri },
   });
 
   authStore.setTokens(data.accessToken, data.refreshToken);

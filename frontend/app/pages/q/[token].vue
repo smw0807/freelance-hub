@@ -13,7 +13,9 @@
               <h2 class="text-xl font-bold">{{ quote.quoteNo }}</h2>
               <p class="text-gray-500 text-sm">{{ quote.project?.title }}</p>
             </div>
-            <UBadge :color="statusColor(quote.status)" size="lg">{{ statusLabel(quote.status) }}</UBadge>
+            <UBadge :color="statusColor(quote.status)" size="lg">{{
+              statusLabel(quote.status)
+            }}</UBadge>
           </div>
         </template>
 
@@ -31,28 +33,55 @@
               <tr v-for="(item, i) in quote.items" :key="i" class="border-b">
                 <td class="py-2">{{ item.description }}</td>
                 <td class="py-2 text-right">{{ item.quantity }}</td>
-                <td class="py-2 text-right">₩{{ item.unitPrice.toLocaleString() }}</td>
-                <td class="py-2 text-right">₩{{ item.amount.toLocaleString() }}</td>
+                <td class="py-2 text-right">
+                  ₩{{ item.unitPrice.toLocaleString() }}
+                </td>
+                <td class="py-2 text-right">
+                  ₩{{ item.amount.toLocaleString() }}
+                </td>
               </tr>
             </tbody>
           </table>
 
           <div class="max-w-xs ml-auto space-y-1 text-sm">
-            <div class="flex justify-between"><span class="text-gray-500">공급가액</span><span>₩{{ quote.subtotal.toLocaleString() }}</span></div>
-            <div class="flex justify-between"><span class="text-gray-500">부가세</span><span>₩{{ quote.vatAmount.toLocaleString() }}</span></div>
-            <div class="flex justify-between"><span class="text-gray-500">할인</span><span>-₩{{ quote.discountAmount.toLocaleString() }}</span></div>
-            <div class="flex justify-between font-bold border-t pt-2 text-lg"><span>합계</span><span>₩{{ quote.totalAmount.toLocaleString() }}</span></div>
+            <div class="flex justify-between">
+              <span class="text-gray-500">공급가액</span
+              ><span>₩{{ quote.subtotal.toLocaleString() }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-500">부가세</span
+              ><span>₩{{ quote.vatAmount.toLocaleString() }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-500">할인</span
+              ><span>-₩{{ quote.discountAmount.toLocaleString() }}</span>
+            </div>
+            <div class="flex justify-between font-bold border-t pt-2 text-lg">
+              <span>합계</span
+              ><span>₩{{ quote.totalAmount.toLocaleString() }}</span>
+            </div>
           </div>
 
-          <p v-if="quote.memo" class="text-sm text-gray-600 border-t pt-3">{{ quote.memo }}</p>
+          <p v-if="quote.memo" class="text-sm text-gray-600 border-t pt-3">
+            {{ quote.memo }}
+          </p>
         </div>
 
         <template v-if="quote.status === 'SENT'" #footer>
           <div class="flex gap-3 justify-center">
-            <UButton color="error" variant="outline" :loading="loading === 'reject'" @click="respond('reject')">
+            <UButton
+              color="error"
+              variant="outline"
+              :loading="loading === 'reject'"
+              @click="respond('reject')"
+            >
               거절
             </UButton>
-            <UButton color="success" :loading="loading === 'accept'" @click="respond('accept')">
+            <UButton
+              color="success"
+              :loading="loading === 'accept'"
+              @click="respond('accept')"
+            >
               수락
             </UButton>
           </div>
@@ -65,45 +94,63 @@
 </template>
 
 <script setup lang="ts">
-import type { Quote, QuoteStatus } from '~/types/models'
+import type { Quote, QuoteStatus } from '~/types/models';
 
-definePageMeta({ layout: false })
+definePageMeta({ layout: false });
 
-const config = useRuntimeConfig()
-const route = useRoute()
-const token = route.params.token as string
+const config = useRuntimeConfig();
+const route = useRoute();
+const token = route.params.token as string;
 
-const quote = ref<Quote | null>(null)
-const loading = ref<string | null>(null)
-const error = ref('')
+const quote = ref<Quote | null>(null);
+const loading = ref<string | null>(null);
+const error = ref('');
 
 onMounted(async () => {
   try {
-    quote.value = await $fetch<Quote>(`${config.public.apiBase}/quotes/public/${token}`)
+    quote.value = await $fetch<Quote>(
+      `${config.public.apiBase}/quotes/public/${token}`,
+    );
   } catch (err: unknown) {
-    error.value = (err as { data?: { message?: string } })?.data?.message || '견적서를 불러올 수 없습니다.'
+    error.value =
+      (err as { data?: { message?: string } })?.data?.message ||
+      '견적서를 불러올 수 없습니다.';
   }
-})
+});
 
 async function respond(action: 'accept' | 'reject') {
-  loading.value = action
+  loading.value = action;
   try {
-    await $fetch(`${config.public.apiBase}/quotes/public/${token}/${action}`, { method: 'POST' })
-    quote.value!.status = action === 'accept' ? 'ACCEPTED' : 'REJECTED'
+    await $fetch(`${config.public.apiBase}/quotes/public/${token}/${action}`, {
+      method: 'POST',
+    });
+    quote.value!.status = action === 'accept' ? 'ACCEPTED' : 'REJECTED';
   } catch {
-    error.value = '처리에 실패했습니다.'
+    error.value = '처리에 실패했습니다.';
   } finally {
-    loading.value = null
+    loading.value = null;
   }
 }
 
 const statusLabelMap: Record<QuoteStatus, string> = {
-  DRAFT: '초안', SENT: '검토 대기', ACCEPTED: '수락됨', REJECTED: '거절됨', EXPIRED: '만료됨',
-}
+  DRAFT: '초안',
+  SENT: '검토 대기',
+  ACCEPTED: '수락됨',
+  REJECTED: '거절됨',
+  EXPIRED: '만료됨',
+};
 const statusColorMap: Record<QuoteStatus, string> = {
-  DRAFT: 'gray', SENT: 'primary', ACCEPTED: 'success', REJECTED: 'error', EXPIRED: 'warning',
-}
+  DRAFT: 'gray',
+  SENT: 'primary',
+  ACCEPTED: 'success',
+  REJECTED: 'error',
+  EXPIRED: 'warning',
+};
 
-function statusLabel(s: QuoteStatus) { return statusLabelMap[s] ?? s }
-function statusColor(s: QuoteStatus) { return statusColorMap[s] ?? 'gray' }
+function statusLabel(s: QuoteStatus) {
+  return statusLabelMap[s] ?? s;
+}
+function statusColor(s: QuoteStatus) {
+  return statusColorMap[s] ?? 'gray';
+}
 </script>
