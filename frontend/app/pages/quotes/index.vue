@@ -65,8 +65,11 @@ const quoteStatusLabelMap: Record<QuoteStatus, string> = {
   REJECTED: '거절',
   EXPIRED: '만료',
 };
-const quoteStatusColorMap: Record<QuoteStatus, string> = {
-  DRAFT: 'gray',
+const quoteStatusColorMap: Record<
+  QuoteStatus,
+  'primary' | 'success' | 'error' | 'warning' | 'secondary' | 'info'
+> = {
+  DRAFT: 'info',
   SENT: 'primary',
   ACCEPTED: 'success',
   REJECTED: 'error',
@@ -76,10 +79,8 @@ const quoteStatusColorMap: Record<QuoteStatus, string> = {
 function quoteStatusLabel(s: QuoteStatus) {
   return quoteStatusLabelMap[s] ?? s;
 }
-function quoteStatusColor(
-  s: QuoteStatus,
-): 'primary' | 'success' | 'error' | 'warning' | 'gray' {
-  return quoteStatusColorMap[s] ?? 'gray';
+function quoteStatusColor(s: QuoteStatus) {
+  return quoteStatusColorMap[s] ?? 'info';
 }
 
 onMounted(async () => {
