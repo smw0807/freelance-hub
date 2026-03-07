@@ -37,11 +37,15 @@ export class AuthService {
       where: { email: dto.email },
     });
     if (!user || !user.password)
-      throw new UnauthorizedException('이메일 또는 비밀번호가 올바르지 않습니다.');
+      throw new UnauthorizedException(
+        '이메일 또는 비밀번호가 올바르지 않습니다.',
+      );
 
     const valid = await bcrypt.compare(dto.password, user.password);
     if (!valid)
-      throw new UnauthorizedException('이메일 또는 비밀번호가 올바르지 않습니다.');
+      throw new UnauthorizedException(
+        '이메일 또는 비밀번호가 올바르지 않습니다.',
+      );
 
     return this.issueTokens(user.id, user.email);
   }
@@ -71,7 +75,11 @@ export class AuthService {
       const email =
         kakaoUser.email || `kakao_${kakaoUser.kakaoOauthId}@noreply.local`;
       user = await this.prisma.user.create({
-        data: { email, name: kakaoUser.name, kakaoOauthId: kakaoUser.kakaoOauthId },
+        data: {
+          email,
+          name: kakaoUser.name,
+          kakaoOauthId: kakaoUser.kakaoOauthId,
+        },
       });
     }
 

@@ -52,10 +52,7 @@ export class DashboardService {
       0,
     );
     const thisYearRevenue = yearlyIncomes.reduce((s, i) => s + i.netAmount, 0);
-    const unpaidTotal = unpaidProjects.reduce(
-      (s, p) => s + p.balanceAmount,
-      0,
-    );
+    const unpaidTotal = unpaidProjects.reduce((s, p) => s + p.balanceAmount, 0);
 
     // Previous month
     const prevMonthStart = new Date(year, month - 1, 1);

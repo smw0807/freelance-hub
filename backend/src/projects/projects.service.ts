@@ -10,7 +10,7 @@ import { ProjectStatus } from '@prisma/client';
 
 @Injectable()
 export class ProjectsService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   async findAll(userId: string, query: QueryProjectDto) {
     const { status, startFrom, startTo, page = 1, limit = 20 } = query;
@@ -61,12 +61,17 @@ export class ProjectsService {
   }
 
   async create(userId: string, dto: CreateProjectDto) {
-    return this.prisma.project.create({ data: { ...normalizeDates(dto), userId } });
+    return this.prisma.project.create({
+      data: { ...normalizeDates(dto), userId },
+    });
   }
 
   async update(userId: string, id: string, dto: UpdateProjectDto) {
     await this.assertOwner(userId, id);
-    return this.prisma.project.update({ where: { id }, data: normalizeDates(dto) });
+    return this.prisma.project.update({
+      where: { id },
+      data: normalizeDates(dto),
+    });
   }
 
   async updateStatus(userId: string, id: string, status: ProjectStatus) {
@@ -111,7 +116,10 @@ export class ProjectsService {
     dto: Partial<CreateChecklistItemDto>,
   ) {
     await this.assertOwner(userId, projectId);
-    return this.prisma.checklistItem.update({ where: { id: itemId }, data: dto });
+    return this.prisma.checklistItem.update({
+      where: { id: itemId },
+      data: dto,
+    });
   }
 
   async removeChecklistItem(userId: string, projectId: string, itemId: string) {

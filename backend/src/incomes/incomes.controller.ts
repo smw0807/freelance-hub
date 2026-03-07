@@ -52,6 +52,9 @@ export class IncomesController {
 
   @Get('tax-report')
   getTaxReport(@CurrentUser() user: any, @Query('year') year?: string) {
-    return this.incomesService.getTaxReport(user.id, year ? parseInt(year) : undefined);
+    return this.incomesService.getTaxReport(
+      user.id,
+      year ? parseInt(year) : undefined,
+    );
   }
 }

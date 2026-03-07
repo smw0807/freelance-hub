@@ -1,4 +1,11 @@
-import { IsOptional, IsEnum, IsBoolean, IsInt, IsDateString, IsString } from 'class-validator';
+import {
+  IsOptional,
+  IsEnum,
+  IsBoolean,
+  IsInt,
+  IsDateString,
+  IsString,
+} from 'class-validator';
 import { IncomeType } from '@prisma/client';
 
 export class UpdateIncomeDto {

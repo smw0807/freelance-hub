@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateQuoteDto } from './dto/create-quote.dto';
 import { UpdateQuoteDto } from './dto/update-quote.dto';
@@ -61,7 +65,10 @@ export class QuotesService {
     const { items, ...rest } = dto;
     return this.prisma.quote.update({
       where: { id },
-      data: { ...rest, ...(items !== undefined ? { items: items as any } : {}) },
+      data: {
+        ...rest,
+        ...(items !== undefined ? { items: items as any } : {}),
+      },
     });
   }
 

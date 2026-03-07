@@ -42,7 +42,8 @@ export class AuthController {
   @UseGuards(AuthGuard('kakao'))
   async kakaoCallback(@Req() req: any, @Res() res: Response) {
     const tokens = await this.authService.kakaoLogin(req.user);
-    const frontendUrl = this.configService.get('FRONTEND_URL') || 'http://localhost:3000';
+    const frontendUrl =
+      this.configService.get('FRONTEND_URL') || 'http://localhost:3000';
     res.redirect(
       `${frontendUrl}/auth/kakao/callback?accessToken=${tokens.accessToken}&refreshToken=${tokens.refreshToken}`,
     );

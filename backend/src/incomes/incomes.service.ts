@@ -7,7 +7,7 @@ import { QueryIncomeDto } from './dto/query-income.dto';
 
 @Injectable()
 export class IncomesService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService) {}
 
   async findAll(userId: string, query: QueryIncomeDto) {
     const { year, month } = query;
@@ -59,9 +59,7 @@ export class IncomesService {
 
     const amount = dto.amount ?? income.amount;
     const isWithholdingTax = dto.isWithholdingTax ?? income.isWithholdingTax;
-    const netAmount = isWithholdingTax
-      ? Math.round(amount * 0.967)
-      : amount;
+    const netAmount = isWithholdingTax ? Math.round(amount * 0.967) : amount;
 
     return this.prisma.income.update({
       where: { id },
@@ -120,7 +118,10 @@ export class IncomesService {
     const incomes = await this.prisma.income.findMany({
       where: {
         userId,
-        paidAt: { gte: new Date(y, 0, 1), lte: new Date(y, 11, 31, 23, 59, 59) },
+        paidAt: {
+          gte: new Date(y, 0, 1),
+          lte: new Date(y, 11, 31, 23, 59, 59),
+        },
       },
     });
 
