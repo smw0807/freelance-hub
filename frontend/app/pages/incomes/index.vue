@@ -156,6 +156,7 @@ import type {
   IncomeSummary,
   TaxReport,
   PaginatedResponse,
+  IncomeType,
 } from '~/types/models';
 
 definePageMeta({ middleware: 'auth' });
@@ -219,7 +220,17 @@ const incomeTypeLabel: Record<string, string> = {
   EXTRA: '추가',
 };
 
-const incomeTypeColor: Record<string, string> = {
+const incomeTypeColor: Record<
+  IncomeType,
+  | 'primary'
+  | 'info'
+  | 'success'
+  | 'neutral'
+  | 'secondary'
+  | 'warning'
+  | 'error'
+  | undefined
+> = {
   FULL: 'primary',
   DEPOSIT: 'info',
   BALANCE: 'success',
@@ -250,10 +261,10 @@ async function fetchAll() {
   await Promise.all([
     fetchIncomes(),
     (async () => {
-      summary.value = await ($api as any)<IncomeSummary>('/incomes/summary');
+      summary.value = await $api<IncomeSummary>('/incomes/summary');
     })(),
     (async () => {
-      taxReport.value = await ($api as any)<TaxReport>(
+      taxReport.value = await $api<TaxReport>(
         `/incomes/tax-report?year=${filterYear.value}`,
       );
     })(),
@@ -287,9 +298,7 @@ async function addIncome() {
 }
 
 onMounted(async () => {
-  const res = await ($api as any)<PaginatedResponse<Project>>(
-    '/projects?limit=100',
-  );
+  const res = await $api<PaginatedResponse<Project>>('/projects?limit=100');
   projects.value = res.data;
   await fetchAll();
 });

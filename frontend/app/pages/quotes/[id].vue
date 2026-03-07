@@ -182,8 +182,11 @@ const statusLabelMap: Record<QuoteStatus, string> = {
   REJECTED: '거절',
   EXPIRED: '만료',
 };
-const statusColorMap: Record<QuoteStatus, string> = {
-  DRAFT: 'gray',
+const statusColorMap: Record<
+  QuoteStatus,
+  'primary' | 'success' | 'error' | 'warning' | 'secondary' | 'info'
+> = {
+  DRAFT: 'info',
   SENT: 'primary',
   ACCEPTED: 'success',
   REJECTED: 'error',
@@ -194,6 +197,6 @@ function statusLabel(s: QuoteStatus) {
   return statusLabelMap[s] ?? s;
 }
 function statusColor(s: QuoteStatus) {
-  return statusColorMap[s] ?? 'gray';
+  return statusColorMap[s] ?? 'info';
 }
 </script>

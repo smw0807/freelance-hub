@@ -107,8 +107,11 @@ const statusLabelMap: Record<ProjectStatus, string> = {
   CANCELLED: '취소',
 };
 
-const statusColorMap: Record<ProjectStatus, string> = {
-  INQUIRY: 'gray',
+const statusColorMap: Record<
+  ProjectStatus,
+  'primary' | 'success' | 'error' | 'warning' | 'secondary' | 'info'
+> = {
+  INQUIRY: 'info',
   NEGOTIATING: 'warning',
   IN_PROGRESS: 'primary',
   DELIVERED: 'info',
