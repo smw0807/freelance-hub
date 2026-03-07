@@ -45,6 +45,7 @@
               size="sm"
               >블랙리스트</UBadge
             >
+            <span v-else class="text-gray-400 text-sm">-</span>
           </template>
           <template #platform-cell="{ row }">
             <UBadge v-if="row.original.platform" variant="outline" size="sm">
@@ -96,7 +97,7 @@ const columns = [
   { accessorKey: 'contactName', header: '담당자' },
   { accessorKey: 'phone', header: '연락처' },
   { accessorKey: 'platform', header: '플랫폼' },
-  { accessorKey: 'isBlacklisted', header: '상태' },
+  { accessorKey: 'isBlacklisted', header: '블랙리스트' },
   { id: 'actions', header: '' },
 ];
 
