@@ -5,8 +5,8 @@ export type UserPlan = 'FREE' | 'PRO';
 export type Platform =
   | 'KMONG'
   | 'SOOMGO'
-  | 'FREELANCERKOREA'
-  | 'CREMON'
+  | 'ELANCER'
+  | 'WANTEDGIGS'
   | 'DIRECT'
   | 'OTHER';
 

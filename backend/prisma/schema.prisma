@@ -14,8 +14,8 @@ enum UserPlan {
 enum Platform {
   KMONG
   SOOMGO
-  FREELANCERKOREA
-  CREMON
+  ELANCER
+  WANTEDGIGS
   DIRECT
   OTHER
 }

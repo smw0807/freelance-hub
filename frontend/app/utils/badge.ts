@@ -17,8 +17,8 @@ type BadgeColor =
 export const platformLabel: Record<Platform, string> = {
   KMONG: '크몽',
   SOOMGO: '숨고',
-  FREELANCERKOREA: '프리랜서코리아',
-  CREMON: '크리몬',
+  ELANCER: '이랜서',
+  WANTEDGIGS: '원티드 긱스',
   DIRECT: '직접 계약',
   OTHER: '기타',
 };
