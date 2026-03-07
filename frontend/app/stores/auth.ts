@@ -1,11 +1,5 @@
 import { defineStore } from 'pinia'
-
-interface User {
-  id: string
-  email: string
-  name: string
-  plan: string
-}
+import type { User } from '~/types/models'
 
 const ACCESS_TOKEN_KEY = 'freelancehub_access_token'
 const REFRESH_TOKEN_KEY = 'freelancehub_refresh_token'
@@ -46,7 +40,7 @@ export const useAuthStore = defineStore('auth', () => {
   async function fetchMe() {
     try {
       const { $api } = useNuxtApp()
-      user.value = await ($api as any)('/auth/me')
+      user.value = await ($api as any)<User>('/auth/me')
     } catch {
       clearAuth()
     }

@@ -6,25 +6,30 @@
         <UButton to="/quotes/new" icon="i-heroicons-plus">새 견적서</UButton>
       </div>
 
-      <UCard :ui="{ body: 'p-0' }">
+      <UCard :ui="{body: 'p-0'}">
         <UTable :data="quotes" :columns="columns" :loading="loading">
-          <template #quoteNo-cell="{ row }">
-            <NuxtLink :to="`/quotes/${row.original.id}`" class="font-medium hover:text-primary-500">
+          <template #quoteNo-cell="{row}">
+            <NuxtLink
+              :to="`/quotes/${row.original.id}`"
+              class="font-medium hover:text-primary-500">
               {{ row.original.quoteNo }}
             </NuxtLink>
           </template>
-          <template #project-cell="{ row }">
+          <template #project-cell="{row}">
             {{ row.original.project?.title }}
           </template>
-          <template #totalAmount-cell="{ row }">
+          <template #totalAmount-cell="{row}">
             ₩{{ row.original.totalAmount.toLocaleString() }}
           </template>
-          <template #status-cell="{ row }">
-            <UBadge :color="quoteStatusColor(row.original.status)" variant="soft" size="sm">
+          <template #status-cell="{row}">
+            <UBadge
+              :color="quoteStatusColor(row.original.status)"
+              variant="soft"
+              size="sm">
               {{ quoteStatusLabel(row.original.status) }}
             </UBadge>
           </template>
-          <template #createdAt-cell="{ row }">
+          <template #createdAt-cell="{row}">
             {{ new Date(row.original.createdAt).toLocaleDateString('ko-KR') }}
           </template>
         </UTable>
@@ -34,37 +39,51 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ middleware: 'auth' })
+import type {Quote, QuoteStatus} from '~/types/models';
 
-const { $api } = useNuxtApp()
+definePageMeta({middleware: 'auth'});
 
-const quotes = ref([])
-const loading = ref(false)
+const {$api} = useNuxtApp();
+
+const quotes = ref<Quote[]>([]);
+const loading = ref(false);
 
 const columns = [
-  { accessorKey: 'quoteNo', header: '견적번호' },
-  { accessorKey: 'project', header: '프로젝트' },
-  { accessorKey: 'totalAmount', header: '금액' },
-  { accessorKey: 'status', header: '상태' },
-  { accessorKey: 'createdAt', header: '발행일' },
-]
+  {accessorKey: 'quoteNo', header: '견적번호'},
+  {accessorKey: 'project', header: '프로젝트'},
+  {accessorKey: 'totalAmount', header: '금액'},
+  {accessorKey: 'status', header: '상태'},
+  {accessorKey: 'createdAt', header: '발행일'},
+];
 
-function quoteStatusLabel(s: string) {
-  const map: any = { DRAFT: '초안', SENT: '발송', ACCEPTED: '수락', REJECTED: '거절', EXPIRED: '만료' }
-  return map[s] || s
+const quoteStatusLabelMap: Record<QuoteStatus, string> = {
+  DRAFT: '초안',
+  SENT: '발송',
+  ACCEPTED: '수락',
+  REJECTED: '거절',
+  EXPIRED: '만료',
+};
+const quoteStatusColorMap: Record<QuoteStatus, string> = {
+  DRAFT: 'gray',
+  SENT: 'primary',
+  ACCEPTED: 'success',
+  REJECTED: 'error',
+  EXPIRED: 'warning',
+};
+
+function quoteStatusLabel(s: QuoteStatus) {
+  return quoteStatusLabelMap[s] ?? s;
 }
-
-function quoteStatusColor(s: string) {
-  const map: any = { DRAFT: 'gray', SENT: 'primary', ACCEPTED: 'success', REJECTED: 'error', EXPIRED: 'warning' }
-  return map[s] || 'gray'
+function quoteStatusColor(s: QuoteStatus) {
+  return quoteStatusColorMap[s] ?? 'gray';
 }
 
 onMounted(async () => {
-  loading.value = true
+  loading.value = true;
   try {
-    quotes.value = await ($api as any)('/quotes')
+    quotes.value = await $api<Quote[]>('/quotes');
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-})
+});
 </script>

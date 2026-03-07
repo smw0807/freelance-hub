@@ -73,22 +73,24 @@
 </template>
 
 <script setup lang="ts">
+import type { Client, Project, ClientStats, ProjectStatus } from '~/types/models'
+
 definePageMeta({ middleware: 'auth' })
 
 const { $api } = useNuxtApp()
 const route = useRoute()
 
-const client = ref<any>(null)
-const projects = ref<any[]>([])
-const stats = ref<any>(null)
+const client = ref<Client | null>(null)
+const projects = ref<Project[]>([])
+const stats = ref<ClientStats | null>(null)
 const showEdit = ref(false)
 
 onMounted(async () => {
   const id = route.params.id as string
   ;[client.value, projects.value, stats.value] = await Promise.all([
-    ($api as any)(`/clients/${id}`),
-    ($api as any)(`/clients/${id}/projects`),
-    ($api as any)(`/clients/${id}/stats`),
+    ($api as any)<Client>(`/clients/${id}`),
+    ($api as any)<Project[]>(`/clients/${id}/projects`),
+    ($api as any)<ClientStats>(`/clients/${id}/stats`),
   ])
 })
 
@@ -96,19 +98,16 @@ function formatDate(d: string) {
   return new Date(d).toLocaleDateString('ko-KR')
 }
 
-function statusLabel(s: string) {
-  const map: any = {
-    INQUIRY: '문의', NEGOTIATING: '협의중', IN_PROGRESS: '진행중',
-    DELIVERED: '납품', COMPLETED: '완료', CANCELLED: '취소',
-  }
-  return map[s] || s
+const statusLabelMap: Record<ProjectStatus, string> = {
+  INQUIRY: '문의', NEGOTIATING: '협의중', IN_PROGRESS: '진행중',
+  DELIVERED: '납품', COMPLETED: '완료', CANCELLED: '취소',
 }
 
-function statusColor(s: string) {
-  const map: any = {
-    INQUIRY: 'gray', NEGOTIATING: 'warning', IN_PROGRESS: 'primary',
-    DELIVERED: 'info', COMPLETED: 'success', CANCELLED: 'error',
-  }
-  return map[s] || 'gray'
+const statusColorMap: Record<ProjectStatus, string> = {
+  INQUIRY: 'gray', NEGOTIATING: 'warning', IN_PROGRESS: 'primary',
+  DELIVERED: 'info', COMPLETED: 'success', CANCELLED: 'error',
 }
+
+function statusLabel(s: ProjectStatus) { return statusLabelMap[s] ?? s }
+function statusColor(s: ProjectStatus) { return statusColorMap[s] ?? 'gray' }
 </script>

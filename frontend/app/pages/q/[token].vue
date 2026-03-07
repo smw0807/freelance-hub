@@ -28,7 +28,7 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="(item, i) in (quote.items as any[])" :key="i" class="border-b">
+              <tr v-for="(item, i) in quote.items" :key="i" class="border-b">
                 <td class="py-2">{{ item.description }}</td>
                 <td class="py-2 text-right">{{ item.quantity }}</td>
                 <td class="py-2 text-right">₩{{ item.unitPrice.toLocaleString() }}</td>
@@ -65,21 +65,23 @@
 </template>
 
 <script setup lang="ts">
+import type { Quote, QuoteStatus } from '~/types/models'
+
 definePageMeta({ layout: false })
 
 const config = useRuntimeConfig()
 const route = useRoute()
 const token = route.params.token as string
 
-const quote = ref<any>(null)
+const quote = ref<Quote | null>(null)
 const loading = ref<string | null>(null)
 const error = ref('')
 
 onMounted(async () => {
   try {
-    quote.value = await $fetch(`${config.public.apiBase}/quotes/public/${token}`)
-  } catch (err: any) {
-    error.value = err?.data?.message || '견적서를 불러올 수 없습니다.'
+    quote.value = await $fetch<Quote>(`${config.public.apiBase}/quotes/public/${token}`)
+  } catch (err: unknown) {
+    error.value = (err as { data?: { message?: string } })?.data?.message || '견적서를 불러올 수 없습니다.'
   }
 })
 
@@ -87,7 +89,7 @@ async function respond(action: 'accept' | 'reject') {
   loading.value = action
   try {
     await $fetch(`${config.public.apiBase}/quotes/public/${token}/${action}`, { method: 'POST' })
-    quote.value.status = action === 'accept' ? 'ACCEPTED' : 'REJECTED'
+    quote.value!.status = action === 'accept' ? 'ACCEPTED' : 'REJECTED'
   } catch {
     error.value = '처리에 실패했습니다.'
   } finally {
@@ -95,13 +97,13 @@ async function respond(action: 'accept' | 'reject') {
   }
 }
 
-function statusLabel(s: string) {
-  const map: any = { DRAFT: '초안', SENT: '검토 대기', ACCEPTED: '수락됨', REJECTED: '거절됨', EXPIRED: '만료됨' }
-  return map[s] || s
+const statusLabelMap: Record<QuoteStatus, string> = {
+  DRAFT: '초안', SENT: '검토 대기', ACCEPTED: '수락됨', REJECTED: '거절됨', EXPIRED: '만료됨',
+}
+const statusColorMap: Record<QuoteStatus, string> = {
+  DRAFT: 'gray', SENT: 'primary', ACCEPTED: 'success', REJECTED: 'error', EXPIRED: 'warning',
 }
 
-function statusColor(s: string) {
-  const map: any = { DRAFT: 'gray', SENT: 'primary', ACCEPTED: 'success', REJECTED: 'error', EXPIRED: 'warning' }
-  return map[s] || 'gray'
-}
+function statusLabel(s: QuoteStatus) { return statusLabelMap[s] ?? s }
+function statusColor(s: QuoteStatus) { return statusColorMap[s] ?? 'gray' }
 </script>

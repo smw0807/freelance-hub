@@ -11,22 +11,52 @@
           <!-- Step 1: Project -->
           <div>
             <h2 class="font-semibold mb-3">1. 프로젝트 선택</h2>
-            <USelect v-model="form.projectId" :items="projectItems" class="w-full" />
+            <USelect
+              v-model="form.projectId"
+              :items="projectItems"
+              class="w-full" />
           </div>
 
           <!-- Step 2: Items -->
           <div>
             <div class="flex items-center justify-between mb-3">
               <h2 class="font-semibold">2. 견적 항목</h2>
-              <UButton size="sm" icon="i-heroicons-plus" variant="outline" @click="addItem">항목 추가</UButton>
+              <UButton
+                size="sm"
+                icon="i-heroicons-plus"
+                variant="outline"
+                @click="addItem"
+                >항목 추가</UButton
+              >
             </div>
             <div class="space-y-2">
-              <div v-for="(item, i) in form.items" :key="i" class="grid grid-cols-12 gap-2 items-center">
-                <UInput v-model="item.description" placeholder="항목명" class="col-span-5" />
-                <UInput v-model.number="item.quantity" type="number" placeholder="수량" class="col-span-2" />
-                <UInput v-model.number="item.unitPrice" type="number" placeholder="단가" class="col-span-3" />
-                <div class="col-span-1 text-right text-sm">₩{{ (item.amount || 0).toLocaleString() }}</div>
-                <UButton class="col-span-1" variant="ghost" icon="i-heroicons-x-mark" size="xs" @click="removeItem(i)" />
+              <div
+                v-for="(item, i) in form.items"
+                :key="i"
+                class="grid grid-cols-12 gap-2 items-center">
+                <UInput
+                  v-model="item.description"
+                  placeholder="항목명"
+                  class="col-span-5" />
+                <UInput
+                  v-model.number="item.quantity"
+                  type="number"
+                  placeholder="수량"
+                  class="col-span-2" />
+                <UInput
+                  v-model.number="item.unitPrice"
+                  type="number"
+                  placeholder="단가"
+                  class="col-span-3" />
+                <div class="col-span-1 text-right text-sm">
+                  ₩{{ (item.amount || 0).toLocaleString() }}
+                </div>
+                <UButton
+                  class="col-span-1"
+                  variant="ghost"
+                  icon="i-heroicons-x-mark"
+                  size="xs"
+                  @click="removeItem(i)" />
               </div>
             </div>
           </div>
@@ -45,7 +75,11 @@
               </div>
               <div class="flex justify-between text-sm items-center">
                 <span class="text-gray-500">할인</span>
-                <UInput v-model.number="form.discountAmount" type="number" size="sm" class="w-32" />
+                <UInput
+                  v-model.number="form.discountAmount"
+                  type="number"
+                  size="sm"
+                  class="w-32" />
               </div>
               <div class="flex justify-between font-bold border-t pt-2">
                 <span>합계</span>
@@ -57,7 +91,10 @@
           <!-- Step 4: Memo -->
           <div>
             <h2 class="font-semibold mb-3">4. 메모</h2>
-            <UTextarea v-model="form.memo" placeholder="특이사항, 유효기간 등" class="w-full" />
+            <UTextarea
+              v-model="form.memo"
+              placeholder="특이사항, 유효기간 등"
+              class="w-full" />
           </div>
 
           <UAlert v-if="error" color="error" :description="error" />
@@ -73,68 +110,76 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ middleware: 'auth' })
+import type {Project, Quote, PaginatedResponse} from '~/types/models';
 
-const { $api } = useNuxtApp()
+definePageMeta({middleware: 'auth'});
 
-const projects = ref<any[]>([])
-const loading = ref(false)
-const error = ref('')
-const includeVat = ref(false)
+const {$api} = useNuxtApp();
+
+const projects = ref<Project[]>([]);
+const loading = ref(false);
+const error = ref('');
+const includeVat = ref(false);
 
 const form = reactive({
   projectId: 'none',
-  items: [{ description: '', quantity: 1, unitPrice: 0, amount: 0 }],
+  items: [{description: '', quantity: 1, unitPrice: 0, amount: 0}],
   subtotal: 0,
   vatAmount: 0,
   discountAmount: 0,
   totalAmount: 0,
   memo: '',
-})
+});
 
 const projectItems = computed(() => [
-  { label: '선택...', value: 'none' },
-  ...projects.value.map((p: any) => ({ label: p.title, value: p.id })),
-])
+  {label: '선택...', value: 'none'},
+  ...projects.value.map((p) => ({label: p.title, value: p.id})),
+]);
 
-watch(() => form.items, recalculate, { deep: true })
-watch([() => form.discountAmount, includeVat], recalculate)
+watch(() => form.items, recalculate, {deep: true});
+watch([() => form.discountAmount, includeVat], recalculate);
 
 onMounted(async () => {
-  const res = await ($api as any)('/projects?limit=100')
-  projects.value = res.data
-})
+  const res = await $api<PaginatedResponse<Project>>('/projects?limit=100');
+  projects.value = res.data;
+});
 
 function addItem() {
-  form.items.push({ description: '', quantity: 1, unitPrice: 0, amount: 0 })
+  form.items.push({description: '', quantity: 1, unitPrice: 0, amount: 0});
 }
 
 function removeItem(i: number) {
-  form.items.splice(i, 1)
-  recalculate()
+  form.items.splice(i, 1);
+  recalculate();
 }
 
 function recalculate() {
   form.items.forEach((item) => {
-    item.amount = (item.quantity || 0) * (item.unitPrice || 0)
-  })
-  form.subtotal = form.items.reduce((s, i) => s + i.amount, 0)
-  form.vatAmount = includeVat.value ? Math.round(form.subtotal * 0.1) : 0
-  form.totalAmount = form.subtotal + form.vatAmount - (form.discountAmount || 0)
+    item.amount = (item.quantity || 0) * (item.unitPrice || 0);
+  });
+  form.subtotal = form.items.reduce((s, i) => s + i.amount, 0);
+  form.vatAmount = includeVat.value ? Math.round(form.subtotal * 0.1) : 0;
+  form.totalAmount =
+    form.subtotal + form.vatAmount - (form.discountAmount || 0);
 }
 
 async function onSubmit() {
-  if (!form.projectId || form.projectId === 'none') { error.value = '프로젝트를 선택해주세요.'; return }
-  loading.value = true
-  error.value = ''
+  if (!form.projectId || form.projectId === 'none') {
+    error.value = '프로젝트를 선택해주세요.';
+    return;
+  }
+  loading.value = true;
+  error.value = '';
   try {
-    recalculate()
-    const quote = await ($api as any)('/quotes', { method: 'POST', body: form })
-    await navigateTo(`/quotes/${quote.id}`)
-  } catch (err: any) {
-    error.value = err?.data?.message || '저장에 실패했습니다.'
+    recalculate();
+    const quote = await $api<Quote>('/quotes', {method: 'POST', body: form});
+    await navigateTo(`/quotes/${quote.id}`);
+  } catch (err: unknown) {
+    error.value =
+      (err as {data?: {message?: string}})?.data?.message ||
+      '저장에 실패했습니다.';
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 </script>

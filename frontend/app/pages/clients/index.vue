@@ -79,7 +79,7 @@ definePageMeta({middleware: 'auth'});
 
 const {$api} = useNuxtApp();
 
-const clients = ref([]);
+const clients = ref<Client[]>([]);
 const total = ref(0);
 const page = ref(1);
 const loading = ref(false);

@@ -142,14 +142,22 @@
 </template>
 
 <script setup lang="ts">
+import type {
+  Income,
+  Project,
+  IncomeSummary,
+  TaxReport,
+  PaginatedResponse,
+} from '~/types/models';
+
 definePageMeta({middleware: 'auth'});
 
 const {$api} = useNuxtApp();
 
-const incomes = ref([]);
-const summary = ref<any>(null);
-const taxReport = ref<any>(null);
-const projects = ref<any[]>([]);
+const incomes = ref<Income[]>([]);
+const summary = ref<IncomeSummary | null>(null);
+const taxReport = ref<TaxReport | null>(null);
+const projects = ref<Project[]>([]);
 const loading = ref(false);
 const filterYear = ref(String(new Date().getFullYear()));
 const filterMonth = ref('all');
@@ -212,16 +220,16 @@ const incomeTypeColor: Record<string, string> = {
 
 const projectItems = computed(() => [
   {label: '선택...', value: 'none'},
-  ...projects.value.map((p: any) => ({label: p.title, value: p.id})),
+  ...projects.value.map((p) => ({label: p.title, value: p.id})),
 ]);
 
 async function fetchIncomes() {
   loading.value = true;
   try {
-    const params: any = {};
+    const params: Record<string, string> = {};
     if (filterYear.value) params.year = filterYear.value;
     if (filterMonth.value !== 'all') params.month = filterMonth.value;
-    incomes.value = await ($api as any)(
+    incomes.value = await $api<Income[]>(
       '/incomes?' + new URLSearchParams(params).toString(),
     );
   } finally {
@@ -234,10 +242,10 @@ async function fetchAll() {
   await Promise.all([
     fetchIncomes(),
     (async () => {
-      summary.value = await ($api as any)('/incomes/summary');
+      summary.value = await ($api as any)<IncomeSummary>('/incomes/summary');
     })(),
     (async () => {
-      taxReport.value = await ($api as any)(
+      taxReport.value = await ($api as any)<TaxReport>(
         `/incomes/tax-report?year=${filterYear.value}`,
       );
     })(),
@@ -261,15 +269,19 @@ async function addIncome() {
     await ($api as any)('/incomes', {method: 'POST', body: addForm});
     addModalOpen.value = false;
     fetchAll();
-  } catch (err: any) {
-    addError.value = err?.data?.message || '저장에 실패했습니다.';
+  } catch (err: unknown) {
+    addError.value =
+      (err as {data?: {message?: string}})?.data?.message ||
+      '저장에 실패했습니다.';
   } finally {
     addLoading.value = false;
   }
 }
 
 onMounted(async () => {
-  const res = await ($api as any)('/projects?limit=100');
+  const res = await ($api as any)<PaginatedResponse<Project>>(
+    '/projects?limit=100',
+  );
   projects.value = res.data;
   await fetchAll();
 });
