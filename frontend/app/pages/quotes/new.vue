@@ -22,9 +22,9 @@
             </div>
             <div class="space-y-2">
               <div v-for="(item, i) in form.items" :key="i" class="grid grid-cols-12 gap-2 items-center">
-                <UInput v-model="item.description" placeholder="항목명" class="col-span-5" @input="recalculate" />
-                <UInput v-model.number="item.quantity" type="number" placeholder="수량" class="col-span-2" @input="recalculate" />
-                <UInput v-model.number="item.unitPrice" type="number" placeholder="단가" class="col-span-3" @input="recalculate" />
+                <UInput v-model="item.description" placeholder="항목명" class="col-span-5" />
+                <UInput v-model.number="item.quantity" type="number" placeholder="수량" class="col-span-2" />
+                <UInput v-model.number="item.unitPrice" type="number" placeholder="단가" class="col-span-3" />
                 <div class="col-span-1 text-right text-sm">₩{{ (item.amount || 0).toLocaleString() }}</div>
                 <UButton class="col-span-1" variant="ghost" icon="i-heroicons-x-mark" size="xs" @click="removeItem(i)" />
               </div>
@@ -41,11 +41,11 @@
               </div>
               <div class="flex justify-between text-sm items-center">
                 <span class="text-gray-500">부가세</span>
-                <UCheckbox v-model="includeVat" @update:model-value="recalculate" label="10% 포함" />
+                <UCheckbox v-model="includeVat" label="10% 포함" />
               </div>
               <div class="flex justify-between text-sm items-center">
                 <span class="text-gray-500">할인</span>
-                <UInput v-model.number="form.discountAmount" type="number" size="sm" class="w-32" @input="recalculate" />
+                <UInput v-model.number="form.discountAmount" type="number" size="sm" class="w-32" />
               </div>
               <div class="flex justify-between font-bold border-t pt-2">
                 <span>합계</span>
@@ -96,6 +96,9 @@ const projectItems = computed(() => [
   { label: '선택...', value: 'none' },
   ...projects.value.map((p: any) => ({ label: p.title, value: p.id })),
 ])
+
+watch(() => form.items, recalculate, { deep: true })
+watch([() => form.discountAmount, includeVat], recalculate)
 
 onMounted(async () => {
   const res = await ($api as any)('/projects?limit=100')
