@@ -8,6 +8,7 @@
           <p class="text-gray-500 text-sm">{{ project.client?.name }}</p>
         </div>
         <div class="ml-auto flex gap-2">
+          <UButton size="sm" variant="outline" icon="i-heroicons-pencil" @click="openEdit">편집</UButton>
           <USelect v-model="project.status" :items="statusItems" size="sm" @update:model-value="updateStatus" />
         </div>
       </div>
@@ -24,6 +25,9 @@
           <p class="text-xs" :class="project.depositPaidAt ? 'text-green-500' : 'text-red-400'">
             {{ project.depositPaidAt ? '수령완료' : '미수령' }}
           </p>
+          <UButton v-if="!project.depositPaidAt" size="xs" variant="soft" class="mt-2" @click="markPaid('deposit')">
+            수령 완료
+          </UButton>
         </UCard>
         <UCard>
           <p class="text-xs text-gray-500">잔금</p>
@@ -31,12 +35,50 @@
           <p class="text-xs" :class="project.balancePaidAt ? 'text-green-500' : 'text-red-400'">
             {{ project.balancePaidAt ? '수령완료' : '미수령' }}
           </p>
+          <UButton v-if="!project.balancePaidAt" size="xs" variant="soft" class="mt-2" @click="markPaid('balance')">
+            수령 완료
+          </UButton>
         </UCard>
         <UCard>
           <p class="text-xs text-gray-500">마감일</p>
           <p class="text-xl font-bold">{{ project.deadlineAt ? new Date(project.deadlineAt).toLocaleDateString('ko-KR') : '-' }}</p>
         </UCard>
       </div>
+
+      <!-- Edit Modal -->
+      <UModal v-model:open="showEdit" title="프로젝트 편집">
+        <template #body>
+          <div class="space-y-4">
+            <UFormField label="계약금액">
+              <UInput v-model.number="editForm.contractAmount" type="number" />
+            </UFormField>
+            <UFormField label="선금">
+              <UInput v-model.number="editForm.depositAmount" type="number" />
+            </UFormField>
+            <UFormField label="잔금">
+              <UInput v-model.number="editForm.balanceAmount" type="number" />
+            </UFormField>
+            <UFormField label="플랫폼">
+              <UInput v-model="editForm.platform" />
+            </UFormField>
+            <UFormField label="시작일">
+              <UInput v-model="editForm.startedAt" type="date" />
+            </UFormField>
+            <UFormField label="마감일">
+              <UInput v-model="editForm.deadlineAt" type="date" />
+            </UFormField>
+            <UFormField label="메모">
+              <UTextarea v-model="editForm.memo" :rows="3" />
+            </UFormField>
+          </div>
+        </template>
+        <template #footer>
+          <div class="flex justify-end gap-2">
+            <UButton variant="ghost" @click="showEdit = false">취소</UButton>
+            <UButton @click="saveEdit">저장</UButton>
+          </div>
+        </template>
+      </UModal>
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Checklist -->
@@ -110,6 +152,16 @@ const route = useRoute()
 const project = ref<any>(null)
 const newCheckItem = ref('')
 const isTracking = ref(false)
+const showEdit = ref(false)
+const editForm = reactive({
+  contractAmount: 0,
+  depositAmount: 0,
+  balanceAmount: 0,
+  platform: '',
+  startedAt: '',
+  deadlineAt: '',
+  memo: '',
+})
 const activeLogId = ref<string | null>(null)
 const timerStart = ref<Date | null>(null)
 const elapsedTime = ref('00:00:00')
@@ -135,6 +187,51 @@ onMounted(async () => {
 onUnmounted(() => {
   if (timerInterval) clearInterval(timerInterval)
 })
+
+function toDateInput(iso: string | null): string {
+  if (!iso) return ''
+  return iso.slice(0, 10)
+}
+
+function openEdit() {
+  const p = project.value
+  editForm.contractAmount = p.contractAmount
+  editForm.depositAmount = p.depositAmount
+  editForm.balanceAmount = p.balanceAmount
+  editForm.platform = p.platform || ''
+  editForm.startedAt = toDateInput(p.startedAt)
+  editForm.deadlineAt = toDateInput(p.deadlineAt)
+  editForm.memo = p.memo || ''
+  showEdit.value = true
+}
+
+async function saveEdit() {
+  const body: Record<string, any> = {
+    contractAmount: editForm.contractAmount,
+    depositAmount: editForm.depositAmount,
+    balanceAmount: editForm.balanceAmount,
+    platform: editForm.platform || null,
+    memo: editForm.memo || null,
+    startedAt: editForm.startedAt ? new Date(editForm.startedAt).toISOString() : null,
+    deadlineAt: editForm.deadlineAt ? new Date(editForm.deadlineAt).toISOString() : null,
+  }
+  const updated = await ($api as any)(`/projects/${project.value.id}`, {
+    method: 'PATCH',
+    body,
+  })
+  Object.assign(project.value, updated)
+  showEdit.value = false
+}
+
+async function markPaid(type: 'deposit' | 'balance') {
+  const field = type === 'deposit' ? 'depositPaidAt' : 'balancePaidAt'
+  const today = new Date().toISOString()
+  await ($api as any)(`/projects/${project.value.id}`, {
+    method: 'PATCH',
+    body: { [field]: today },
+  })
+  project.value[field] = today
+}
 
 async function updateStatus(status: string) {
   await ($api as any)(`/projects/${project.value.id}/status`, {
