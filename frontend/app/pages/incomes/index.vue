@@ -3,9 +3,16 @@
     <div class="p-6 space-y-6">
       <div class="flex items-center justify-between">
         <h1 class="text-2xl font-bold">정산 / 세금</h1>
-        <UButton icon="i-heroicons-plus" @click="addModalOpen = true"
-          >수입 추가</UButton
-        >
+        <div class="flex gap-2">
+          <UButton
+            variant="outline"
+            icon="i-heroicons-document-arrow-down"
+            @click="downloadPdf"
+          >연간 리포트</UButton>
+          <UButton icon="i-heroicons-plus" @click="addModalOpen = true"
+            >수입 추가</UButton
+          >
+        </div>
       </div>
 
       <!-- Summary Cards -->
@@ -33,6 +40,28 @@
           <p class="text-2xl font-bold">
             ₩{{ taxReport.estimatedIncomeTax.toLocaleString() }}
           </p>
+        </UCard>
+      </div>
+
+      <!-- Charts -->
+      <div v-if="summary" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <UCard>
+          <template #header><h2 class="font-semibold">월별 수입</h2></template>
+          <ClientOnly>
+            <Bar :data="monthlyChartData" :options="barOptions" class="max-h-52" />
+          </ClientOnly>
+        </UCard>
+        <UCard>
+          <template #header><h2 class="font-semibold">플랫폼별 수입</h2></template>
+          <ClientOnly>
+            <Doughnut
+              v-if="summary.platformBreakdown?.length"
+              :data="platformChartData"
+              :options="doughnutOptions"
+              class="max-h-52"
+            />
+            <div v-else class="flex items-center justify-center h-52 text-gray-400 text-sm">데이터 없음</div>
+          </ClientOnly>
         </UCard>
       </div>
 
@@ -150,6 +179,16 @@
 </template>
 
 <script setup lang="ts">
+import { Bar, Doughnut } from 'vue-chartjs';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  ArcElement,
+  Tooltip,
+  Legend,
+} from 'chart.js';
 import type {
   Income,
   Project,
@@ -158,9 +197,12 @@ import type {
   PaginatedResponse,
 } from '~/types/models';
 
+ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Tooltip, Legend);
+
 definePageMeta({ middleware: 'auth' });
 
 const { $api } = useNuxtApp();
+const authStore = useAuthStore();
 
 const incomes = ref<Income[]>([]);
 const summary = ref<IncomeSummary | null>(null);
@@ -277,4 +319,76 @@ onMounted(async () => {
   projects.value = res.data;
   await fetchAll();
 });
+
+// ── Chart data ──────────────────────────────────────────────────────────────
+
+const PALETTE = [
+  'rgba(59,130,246,0.7)',
+  'rgba(16,185,129,0.7)',
+  'rgba(245,158,11,0.7)',
+  'rgba(239,68,68,0.7)',
+  'rgba(139,92,246,0.7)',
+  'rgba(236,72,153,0.7)',
+];
+
+const monthlyChartData = computed(() => ({
+  labels: summary.value?.monthlyBreakdown?.map((m) => `${m.month}월`) ?? [],
+  datasets: [
+    {
+      label: '실수령액',
+      data: summary.value?.monthlyBreakdown?.map((m) => m.total) ?? [],
+      backgroundColor: 'rgba(59, 130, 246, 0.6)',
+      borderRadius: 4,
+    },
+  ],
+}));
+
+const platformChartData = computed(() => ({
+  labels: summary.value?.platformBreakdown?.map((p) => p.label) ?? [],
+  datasets: [
+    {
+      data: summary.value?.platformBreakdown?.map((p) => p.total) ?? [],
+      backgroundColor: PALETTE,
+    },
+  ],
+}));
+
+const barOptions = {
+  responsive: true,
+  plugins: { legend: { display: false } },
+  scales: {
+    y: {
+      ticks: { callback: (v: number) => `₩${(v / 10000).toFixed(0)}만` },
+    },
+  },
+};
+
+const doughnutOptions = {
+  responsive: true,
+  plugins: {
+    legend: { position: 'bottom' as const },
+    tooltip: {
+      callbacks: {
+        label: (ctx: any) => ` ₩${ctx.parsed.toLocaleString()}`,
+      },
+    },
+  },
+};
+
+// ── PDF download ──────────────────────────────────────────────────────────────
+
+async function downloadPdf() {
+  const config = useRuntimeConfig();
+  const url = `${config.public.apiBase}/incomes/report/pdf?year=${filterYear.value}`;
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${authStore.accessToken}` },
+  });
+  if (!res.ok) return;
+  const blob = await res.blob();
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `income-report-${filterYear.value}.pdf`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
 </script>

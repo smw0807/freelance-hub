@@ -152,6 +152,17 @@ export interface ClientStats {
   totalRevenue: number;
 }
 
+export interface MonthlyTrend {
+  month: string;
+  total: number;
+}
+
+export interface PlatformBreakdown {
+  platform: string;
+  label: string;
+  total: number;
+}
+
 export interface DashboardData {
   summary: {
     thisMonthRevenue: number;
@@ -169,15 +180,19 @@ export interface DashboardData {
       client?: Pick<Client, 'name'>;
     }
   >;
+  monthlyTrend: MonthlyTrend[];
 }
 
 export interface IncomeSummary {
   thisMonth: number;
   thisYear: number;
+  monthlyBreakdown: { month: number; total: number }[];
+  platformBreakdown: PlatformBreakdown[];
 }
 
 export interface TaxReport {
   year: number;
+  totalRevenue: number;
   withholdingTaxTotal: number;
   estimatedIncomeTax: number;
 }

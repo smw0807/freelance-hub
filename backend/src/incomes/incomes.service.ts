@@ -5,6 +5,15 @@ import { CreateIncomeDto } from './dto/create-income.dto';
 import { UpdateIncomeDto } from './dto/update-income.dto';
 import { QueryIncomeDto } from './dto/query-income.dto';
 
+const PLATFORM_LABEL: Record<string, string> = {
+  KMONG: '크몽',
+  SOOMGO: '숨고',
+  FREELANCERKOREA: '프리랜서코리아',
+  CREMON: '크리몬',
+  DIRECT: '직접계약',
+  OTHER: '기타',
+};
+
 @Injectable()
 export class IncomesService {
   constructor(private prisma: PrismaService) {}
@@ -85,14 +94,19 @@ export class IncomesService {
     const yearStart = new Date(year, 0, 1);
     const yearEnd = new Date(year, 11, 31, 23, 59, 59);
 
-    const [monthlyIncomes, yearlyIncomes] = await Promise.all([
-      this.prisma.income.findMany({
-        where: { userId, paidAt: { gte: monthStart, lte: monthEnd } },
-      }),
-      this.prisma.income.findMany({
-        where: { userId, paidAt: { gte: yearStart, lte: yearEnd } },
-      }),
-    ]);
+    const [monthlyIncomes, yearlyIncomes, yearlyWithProject] =
+      await Promise.all([
+        this.prisma.income.findMany({
+          where: { userId, paidAt: { gte: monthStart, lte: monthEnd } },
+        }),
+        this.prisma.income.findMany({
+          where: { userId, paidAt: { gte: yearStart, lte: yearEnd } },
+        }),
+        this.prisma.income.findMany({
+          where: { userId, paidAt: { gte: yearStart, lte: yearEnd } },
+          include: { project: { select: { platform: true } } },
+        }),
+      ]);
 
     // Monthly by month for current year
     const monthlyBreakdown = Array.from({ length: 12 }, (_, i) => {
@@ -106,11 +120,64 @@ export class IncomesService {
       };
     });
 
+    // Platform breakdown
+    const platformMap: Record<string, number> = {};
+    for (const inc of yearlyWithProject) {
+      const platform = (inc as any).project?.platform ?? 'OTHER';
+      platformMap[platform] = (platformMap[platform] ?? 0) + inc.netAmount;
+    }
+    const platformBreakdown = Object.entries(platformMap).map(
+      ([platform, total]) => ({
+        platform,
+        label: PLATFORM_LABEL[platform] ?? platform,
+        total,
+      }),
+    );
+
     return {
       thisMonth: monthlyIncomes.reduce((s, i) => s + i.netAmount, 0),
       thisYear: yearlyIncomes.reduce((s, i) => s + i.netAmount, 0),
       monthlyBreakdown,
+      platformBreakdown,
     };
+  }
+
+  async getReportData(userId: string, year?: number) {
+    const y = year ?? new Date().getFullYear();
+    const taxReport = await this.getTaxReport(userId, y);
+
+    const incomes = await this.prisma.income.findMany({
+      where: {
+        userId,
+        paidAt: {
+          gte: new Date(y, 0, 1),
+          lte: new Date(y, 11, 31, 23, 59, 59),
+        },
+      },
+      include: { project: { select: { id: true, title: true, platform: true } } },
+      orderBy: { paidAt: 'asc' },
+    });
+
+    const monthlyBreakdown = Array.from({ length: 12 }, (_, i) => {
+      const m = i + 1;
+      const monthIncomes = incomes.filter(
+        (inc) => new Date(inc.paidAt).getMonth() + 1 === m,
+      );
+      return {
+        month: m,
+        total: monthIncomes.reduce((s, i) => s + i.netAmount, 0),
+        withheld: monthIncomes
+          .filter((i) => i.isWithholdingTax)
+          .reduce((s, i) => s + Math.round(i.amount * 0.033), 0),
+      };
+    });
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { name: true, email: true },
+    });
+
+    return { user, year: y, taxReport, monthlyBreakdown, incomes };
   }
 
   async getTaxReport(userId: string, year?: number) {

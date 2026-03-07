@@ -65,6 +65,9 @@ export class DashboardService {
       0,
     );
 
+    // Monthly trend: last 6 months including current month
+    const monthlyTrend = await this.getMonthlyTrend(userId, now);
+
     return {
       summary: {
         thisMonthRevenue,
@@ -74,6 +77,24 @@ export class DashboardService {
       },
       upcomingDeadlines,
       unpaidProjects,
+      monthlyTrend,
     };
+  }
+
+  private async getMonthlyTrend(userId: string, now: Date) {
+    const results: { month: string; total: number }[] = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const start = new Date(d.getFullYear(), d.getMonth(), 1);
+      const end = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59);
+      const incomes = await this.prisma.income.findMany({
+        where: { userId, paidAt: { gte: start, lte: end } },
+      });
+      results.push({
+        month: `${d.getMonth() + 1}월`,
+        total: incomes.reduce((s, inc) => s + inc.netAmount, 0),
+      });
+    }
+    return results;
   }
 }

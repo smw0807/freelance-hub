@@ -74,6 +74,7 @@ const navItems = [
   { to: '/projects', label: '프로젝트', icon: 'i-heroicons-folder' },
   { to: '/quotes', label: '견적서', icon: 'i-heroicons-document-text' },
   { to: '/incomes', label: '정산/세금', icon: 'i-heroicons-banknotes' },
+  { to: '/settings', label: '설정', icon: 'i-heroicons-cog-6-tooth' },
 ];
 
 const userInitial = computed(

@@ -28,6 +28,16 @@
         </UCard>
       </div>
 
+      <!-- Monthly Trend Chart -->
+      <UCard v-if="dashboard?.monthlyTrend?.length">
+        <template #header>
+          <h2 class="font-semibold">최근 6개월 수입</h2>
+        </template>
+        <ClientOnly>
+          <Bar :data="monthlyChartData" :options="barOptions" class="max-h-56" />
+        </ClientOnly>
+      </UCard>
+
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Upcoming Deadlines -->
         <UCard>
@@ -114,7 +124,18 @@
 </template>
 
 <script setup lang="ts">
+import { Bar } from 'vue-chartjs';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Tooltip,
+  Legend,
+} from 'chart.js';
 import type { DashboardData } from '~/types/models';
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 definePageMeta({ middleware: 'auth' });
 
@@ -127,6 +148,30 @@ onMounted(async () => {
     dashboard.value = await $api<DashboardData>('/dashboard');
   } catch {}
 });
+
+const monthlyChartData = computed(() => ({
+  labels: dashboard.value?.monthlyTrend?.map((t) => t.month) ?? [],
+  datasets: [
+    {
+      label: '실수령액',
+      data: dashboard.value?.monthlyTrend?.map((t) => t.total) ?? [],
+      backgroundColor: 'rgba(59, 130, 246, 0.6)',
+      borderRadius: 4,
+    },
+  ],
+}));
+
+const barOptions = {
+  responsive: true,
+  plugins: { legend: { display: false } },
+  scales: {
+    y: {
+      ticks: {
+        callback: (v: number) => `₩${(v / 10000).toFixed(0)}만`,
+      },
+    },
+  },
+};
 
 const currentMonth = computed(() => {
   const now = new Date();
