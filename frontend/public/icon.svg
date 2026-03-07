@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6366f1"/>
+      <stop offset="1" stop-color="#3b82f6"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+
+  <!-- Connecting lines (behind circles) -->
+  <line x1="256" y1="200" x2="256" y2="148" stroke="white" stroke-width="20" stroke-linecap="round"/>
+  <line x1="312" y1="256" x2="364" y2="256" stroke="white" stroke-width="20" stroke-linecap="round"/>
+  <line x1="256" y1="312" x2="256" y2="364" stroke="white" stroke-width="20" stroke-linecap="round"/>
+  <line x1="200" y1="256" x2="148" y2="256" stroke="white" stroke-width="20" stroke-linecap="round"/>
+
+  <!-- Outer nodes -->
+  <circle cx="256" cy="112" r="36" fill="white" opacity="0.85"/>
+  <circle cx="400" cy="256" r="36" fill="white" opacity="0.85"/>
+  <circle cx="256" cy="400" r="36" fill="white" opacity="0.85"/>
+  <circle cx="112" cy="256" r="36" fill="white" opacity="0.85"/>
+
+  <!-- Center node -->
+  <circle cx="256" cy="256" r="56" fill="white"/>
+</svg>
