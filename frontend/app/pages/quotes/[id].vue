@@ -169,9 +169,15 @@ function copyLink() {
 
 async function downloadPdf() {
   const url = `${config.public.apiBase}/quotes/${quote.value!.id}/pdf`;
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${useAuthStore().accessToken}` },
+  });
+  if (!res.ok) return;
+  const blob = await res.blob();
   const a = document.createElement('a');
-  a.href = url;
-  a.setAttribute('Authorization', `Bearer ${useAuthStore().accessToken}`);
-  window.open(url + '?token=' + useAuthStore().accessToken);
+  a.href = URL.createObjectURL(blob);
+  a.download = `quote-${quote.value!.quoteNo}.pdf`;
+  a.click();
+  URL.revokeObjectURL(a.href);
 }
 </script>
