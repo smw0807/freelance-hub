@@ -83,6 +83,8 @@
 
 <script setup lang="ts">
 import type { Client, Project, PaginatedResponse } from '~/types/models';
+import { PLATFORM_ITEMS as platformItems } from '~/constants/platform';
+import { STATUS_ITEMS_CREATE as statusItems } from '~/constants/project';
 
 definePageMeta({ middleware: 'auth' });
 
@@ -111,20 +113,6 @@ const clientItems = computed(() => [
   ...clients.value.map((c) => ({ label: c.name, value: c.id })),
 ]);
 
-const statusItems = [
-  { label: '문의', value: 'INQUIRY' },
-  { label: '협의중', value: 'NEGOTIATING' },
-  { label: '진행중', value: 'IN_PROGRESS' },
-];
-
-const platformItems = [
-  { label: '직접 계약', value: 'DIRECT' },
-  { label: '크몽', value: 'KMONG' },
-  { label: '숨고', value: 'SOOMGO' },
-  { label: '이랜서', value: 'ELANCER' },
-  { label: '원티드 긱스', value: 'WANTEDGIGS' },
-  { label: '기타', value: 'OTHER' },
-];
 
 onMounted(async () => {
   const res = await $api<PaginatedResponse<Client>>('/clients?limit=100');
