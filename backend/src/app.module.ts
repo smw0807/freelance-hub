@@ -16,6 +16,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
     ConfigModule.forRoot({
       isGlobal: true,
       validationSchema: Joi.object({
+        PORT: Joi.number().optional(),
         APP_PORT: Joi.number().default(3002),
         DATABASE_URL: Joi.string().required(),
         JWT_SECRET: Joi.string().required(),

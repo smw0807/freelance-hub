@@ -15,8 +15,11 @@ async function bootstrap() {
     credentials: true,
   });
 
-  const port = configService.get<number>('APP_PORT') ?? 3002;
-  await app.listen(port);
-  console.log(`Backend running on http://localhost:${port}`);
+  const port =
+    configService.get<number>('PORT') ??
+    configService.get<number>('APP_PORT') ??
+    3002;
+  await app.listen(port, '0.0.0.0');
+  console.log(`Backend running on http://0.0.0.0:${port}`);
 }
 bootstrap();
