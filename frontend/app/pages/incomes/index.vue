@@ -121,12 +121,25 @@
               size="xs"
               icon="i-heroicons-trash"
               color="error"
-              @click="deleteIncome(row.original.id)"
+              @click="confirmDelete(row.original.id)"
             />
           </template>
         </UTable>
       </UCard>
     </div>
+
+    <!-- 삭제 확인 Modal -->
+    <UModal v-model:open="showDeleteConfirm" title="수입 삭제">
+      <template #body>
+        <p class="text-sm text-gray-600">정말 삭제하시겠습니까?</p>
+      </template>
+      <template #footer>
+        <div class="flex justify-end gap-2">
+          <UButton variant="ghost" @click="showDeleteConfirm = false">취소</UButton>
+          <UButton color="error" @click="deleteIncome">삭제</UButton>
+        </div>
+      </template>
+    </UModal>
 
     <!-- Add Modal -->
     <UModal v-model:open="addModalOpen" title="수입 추가">
@@ -288,9 +301,18 @@ async function fetchAll() {
   ]);
 }
 
-async function deleteIncome(id: string) {
-  if (!confirm('삭제하시겠습니까?')) return;
-  await ($api as any)(`/incomes/${id}`, { method: 'DELETE' });
+const showDeleteConfirm = ref(false);
+const deleteTargetId = ref<string | null>(null);
+
+function confirmDelete(id: string) {
+  deleteTargetId.value = id;
+  showDeleteConfirm.value = true;
+}
+
+async function deleteIncome() {
+  if (!deleteTargetId.value) return;
+  await ($api as any)(`/incomes/${deleteTargetId.value}`, { method: 'DELETE' });
+  showDeleteConfirm.value = false;
   fetchIncomes();
 }
 
