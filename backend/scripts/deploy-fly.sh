@@ -40,6 +40,8 @@ source "${ENV_FILE}"
 set +a
 
 required_vars=(
+  APP_NAME
+  APP_PORT
   DATABASE_URL
   JWT_SECRET
   JWT_REFRESH_SECRET
@@ -61,6 +63,8 @@ fi
 
 echo "Fly secrets 업데이트 중..."
 fly secrets set --app "${APP_NAME}" \
+  APP_NAME="${APP_NAME}" \
+  APP_PORT="${APP_PORT}" \
   DATABASE_URL="${DATABASE_URL}" \
   JWT_SECRET="${JWT_SECRET}" \
   JWT_REFRESH_SECRET="${JWT_REFRESH_SECRET}" \
