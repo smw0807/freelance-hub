@@ -23,7 +23,7 @@
             variant="outline"
             size="sm"
             icon="i-heroicons-arrow-down-tray"
-            @click="downloadPdf"
+            @click="onDownloadPdf"
           >
             PDF
           </UButton>
@@ -106,23 +106,20 @@
       v-model:open="shareModalOpen"
       :loading="shareLoading"
       :initial-expires-at="shareForm.expiresAt"
-      @submit="createShareLink"
+      @submit="onCreateShareLink"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import type { Quote } from '~/types/models';
-
 definePageMeta({ middleware: 'auth' });
 
-const { $api } = useNuxtApp();
 const route = useRoute();
 const config = useRuntimeConfig();
+const quoteStore = useQuoteStore();
+const { quote, shareLoading } = storeToRefs(quoteStore);
 
-const quote = ref<Quote | null>(null);
 const shareModalOpen = ref(false);
-const shareLoading = ref(false);
 const shareForm = reactive({ expiresAt: '' });
 
 const shareUrl = computed(() =>
@@ -131,41 +128,18 @@ const shareUrl = computed(() =>
     : '',
 );
 
-onMounted(async () => {
-  quote.value = await $api<Quote>(`/quotes/${route.params.id}`);
-});
+onMounted(() => quoteStore.fetchQuote(route.params.id as string));
 
-async function createShareLink(expiresAt: string) {
-  shareLoading.value = true;
-  try {
-    const body: Record<string, string> = {};
-    if (expiresAt) body.expiresAt = new Date(expiresAt).toISOString();
-    const updated = await $api<Partial<Quote>>(
-      `/quotes/${quote.value!.id}/share`,
-      { method: 'POST', body },
-    );
-    quote.value = { ...quote.value!, ...updated };
-    shareModalOpen.value = false;
-  } finally {
-    shareLoading.value = false;
-  }
+async function onCreateShareLink(expiresAt: string) {
+  await quoteStore.createShareLink(quote.value!.id, expiresAt);
+  shareModalOpen.value = false;
 }
 
 function copyLink() {
   navigator.clipboard.writeText(shareUrl.value);
 }
 
-async function downloadPdf() {
-  const url = `${config.public.apiBase}/quotes/${quote.value!.id}/pdf`;
-  const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${useAuthStore().accessToken}` },
-  });
-  if (!res.ok) return;
-  const blob = await res.blob();
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `quote-${quote.value!.quoteNo}.pdf`;
-  a.click();
-  URL.revokeObjectURL(a.href);
+async function onDownloadPdf() {
+  await quoteStore.downloadPdf(quote.value!.id, quote.value!.quoteNo);
 }
 </script>

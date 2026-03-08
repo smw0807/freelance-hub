@@ -41,14 +41,10 @@
 </template>
 
 <script setup lang="ts">
-import type { Quote } from '~/types/models';
-
 definePageMeta({ middleware: 'auth' });
 
-const { $api } = useNuxtApp();
-
-const quotes = ref<Quote[]>([]);
-const loading = ref(false);
+const quoteStore = useQuoteStore();
+const { quotes, loading } = storeToRefs(quoteStore);
 
 const columns = [
   { accessorKey: 'quoteNo', header: '견적번호' },
@@ -58,12 +54,5 @@ const columns = [
   { accessorKey: 'createdAt', header: '발행일' },
 ];
 
-onMounted(async () => {
-  loading.value = true;
-  try {
-    quotes.value = await $api<Quote[]>('/quotes');
-  } finally {
-    loading.value = false;
-  }
-});
+onMounted(() => quoteStore.fetchQuotes());
 </script>

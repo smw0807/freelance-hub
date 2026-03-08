@@ -82,7 +82,7 @@ import { PLATFORM_ITEMS as platformItems } from '~/constants/platform';
 
 definePageMeta({ middleware: 'auth' });
 
-const { $api } = useNuxtApp();
+const clientStore = useClientStore();
 
 const form = reactive({
   name: '',
@@ -106,7 +106,7 @@ async function onSubmit() {
   loading.value = true;
   error.value = '';
   try {
-    await ($api as any)('/clients', { method: 'POST', body: form });
+    await clientStore.createClient(form);
     await navigateTo('/clients');
   } catch (err: any) {
     error.value = err?.data?.message || '저장에 실패했습니다.';

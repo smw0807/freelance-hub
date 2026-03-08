@@ -11,7 +11,7 @@
       <UTabs
         v-model="activeStatus"
         :items="tabs"
-        @update:model-value="fetchProjects"
+        @update:model-value="loadProjects"
       />
 
       <div class="mt-4">
@@ -57,14 +57,11 @@
 </template>
 
 <script setup lang="ts">
-import type { Project, PaginatedResponse } from '~/types/models';
-
 definePageMeta({ middleware: 'auth' });
 
-const { $api } = useNuxtApp();
+const projectStore = useProjectStore();
+const { projects, loading } = storeToRefs(projectStore);
 
-const projects = ref<Project[]>([]);
-const loading = ref(false);
 const activeStatus = ref('');
 
 const tabs = [
@@ -84,19 +81,11 @@ const columns = [
   { accessorKey: 'deadlineAt', header: '마감일' },
 ];
 
-async function fetchProjects() {
-  loading.value = true;
-  try {
-    const params: Record<string, string> = {};
-    if (activeStatus.value) params.status = activeStatus.value;
-    const res = await $api<PaginatedResponse<Project>>(
-      '/projects?' + new URLSearchParams(params).toString(),
-    );
-    projects.value = res.data;
-  } finally {
-    loading.value = false;
-  }
+async function loadProjects() {
+  const params: Record<string, string> = {};
+  if (activeStatus.value) params.status = activeStatus.value;
+  await projectStore.fetchProjects(params);
 }
 
-onMounted(fetchProjects);
+onMounted(loadProjects);
 </script>

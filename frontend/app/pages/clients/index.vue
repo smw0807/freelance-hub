@@ -23,7 +23,7 @@
             { label: '블랙리스트 제외', value: 'false' },
             { label: '블랙리스트만', value: 'true' },
           ]"
-          @update:model-value="fetchClients"
+          @update:model-value="loadClients"
         />
       </div>
 
@@ -71,7 +71,7 @@
           v-model:page="page"
           :total="total"
           :items-per-page="20"
-          @update:page="fetchClients"
+          @update:page="loadClients"
         />
       </div>
     </div>
@@ -88,12 +88,10 @@ import { useDebounceFn } from '@vueuse/core';
 
 definePageMeta({ middleware: 'auth' });
 
-const { $api } = useNuxtApp();
+const clientStore = useClientStore();
+const { clients, total, loading } = storeToRefs(clientStore);
 
-const clients = ref<Client[]>([]);
-const total = ref(0);
 const page = ref(1);
-const loading = ref(false);
 const search = ref('');
 const blacklistFilter = ref('all');
 
@@ -106,24 +104,14 @@ const columns = [
   { id: 'actions', header: '' },
 ];
 
-async function fetchClients() {
-  loading.value = true;
-  try {
-    const params: any = { page: page.value };
-    if (search.value) params.search = search.value;
-    if (blacklistFilter.value !== 'all')
-      params.isBlacklisted = blacklistFilter.value;
-    const res = await ($api as any)(
-      '/clients?' + new URLSearchParams(params).toString(),
-    );
-    clients.value = res.data;
-    total.value = res.total;
-  } finally {
-    loading.value = false;
-  }
+async function loadClients() {
+  const params: Record<string, any> = { page: page.value };
+  if (search.value) params.search = search.value;
+  if (blacklistFilter.value !== 'all') params.isBlacklisted = blacklistFilter.value;
+  await clientStore.fetchClients(params);
 }
 
-const debouncedFetch = useDebounceFn(fetchClients, 300);
+const debouncedFetch = useDebounceFn(loadClients, 300);
 
 const showDeleteConfirm = ref(false);
 const deleteTargetId = ref<string | null>(null);
@@ -135,10 +123,10 @@ function confirmDelete(id: string) {
 
 async function deleteClient() {
   if (!deleteTargetId.value) return;
-  await ($api as any)(`/clients/${deleteTargetId.value}`, { method: 'DELETE' });
+  await clientStore.deleteClient(deleteTargetId.value);
   showDeleteConfirm.value = false;
-  fetchClients();
+  await loadClients();
 }
 
-onMounted(fetchClients);
+onMounted(loadClients);
 </script>

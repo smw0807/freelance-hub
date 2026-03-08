@@ -16,19 +16,19 @@
       </div>
 
       <!-- Stats -->
-      <div class="grid grid-cols-3 gap-4" v-if="stats">
+      <div class="grid grid-cols-3 gap-4" v-if="clientStats">
         <UCard>
           <p class="text-sm text-gray-500">총 프로젝트</p>
-          <p class="text-2xl font-bold">{{ stats.totalProjects }}</p>
+          <p class="text-2xl font-bold">{{ clientStats.totalProjects }}</p>
         </UCard>
         <UCard>
           <p class="text-sm text-gray-500">완료 프로젝트</p>
-          <p class="text-2xl font-bold">{{ stats.completedProjects }}</p>
+          <p class="text-2xl font-bold">{{ clientStats.completedProjects }}</p>
         </UCard>
         <UCard>
           <p class="text-sm text-gray-500">총 수입</p>
           <p class="text-2xl font-bold">
-            ₩{{ stats.totalRevenue.toLocaleString() }}
+            ₩{{ clientStats.totalRevenue.toLocaleString() }}
           </p>
         </UCard>
       </div>
@@ -77,12 +77,12 @@
             >
           </div>
         </template>
-        <div v-if="!projects.length" class="text-center text-gray-400 py-6">
+        <div v-if="!clientProjects.length" class="text-center text-gray-400 py-6">
           프로젝트가 없습니다.
         </div>
         <div v-else class="space-y-2">
           <NuxtLink
-            v-for="project in projects"
+            v-for="project in clientProjects"
             :key="project.id"
             :to="`/projects/${project.id}`"
             class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
@@ -108,24 +108,20 @@
 </template>
 
 <script setup lang="ts">
-import type { Client, Project, ClientStats } from '~/types/models';
-
 definePageMeta({ middleware: 'auth' });
 
-const { $api } = useNuxtApp();
 const route = useRoute();
+const clientStore = useClientStore();
+const { client, clientProjects, clientStats } = storeToRefs(clientStore);
 
-const client = ref<Client | null>(null);
-const projects = ref<Project[]>([]);
-const stats = ref<ClientStats | null>(null);
 const showEdit = ref(false);
 
 onMounted(async () => {
   const id = route.params.id as string;
-  [client.value, projects.value, stats.value] = await Promise.all([
-    ($api as any)<Client>(`/clients/${id}`),
-    ($api as any)<Project[]>(`/clients/${id}/projects`),
-    ($api as any)<ClientStats>(`/clients/${id}/stats`),
+  await Promise.all([
+    clientStore.fetchClient(id),
+    clientStore.fetchClientProjects(id),
+    clientStore.fetchClientStats(id),
   ]);
 });
 

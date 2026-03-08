@@ -82,7 +82,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Client, Project, PaginatedResponse } from '~/types/models';
+import type { Client, PaginatedResponse } from '~/types/models';
 import { PLATFORM_ITEMS as platformItems } from '~/constants/platform';
 import { STATUS_ITEMS_CREATE as statusItems } from '~/constants/project';
 
@@ -90,6 +90,7 @@ definePageMeta({ middleware: 'auth' });
 
 const { $api } = useNuxtApp();
 const route = useRoute();
+const projectStore = useProjectStore();
 
 const form = reactive({
   title: '',
@@ -113,7 +114,6 @@ const clientItems = computed(() => [
   ...clients.value.map((c) => ({ label: c.name, value: c.id })),
 ]);
 
-
 onMounted(async () => {
   const res = await $api<PaginatedResponse<Client>>('/clients?limit=100');
   clients.value = res.data;
@@ -131,10 +131,7 @@ async function onSubmit() {
     if (!body.clientId || body.clientId === 'none') delete body.clientId;
     if (!body.startedAt) delete body.startedAt;
     if (!body.deadlineAt) delete body.deadlineAt;
-    const project = await $api<Project>('/projects', {
-      method: 'POST',
-      body,
-    });
+    const project = await projectStore.createProject(body);
     await navigateTo(`/projects/${project.id}`);
   } catch (err: unknown) {
     error.value =

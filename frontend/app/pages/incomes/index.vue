@@ -7,7 +7,7 @@
           <UButton
             variant="outline"
             icon="i-heroicons-document-arrow-down"
-            @click="downloadPdf"
+            @click="onDownloadPdf"
             >연간 리포트</UButton
           >
           <UButton icon="i-heroicons-plus" @click="addModalOpen = true"
@@ -82,12 +82,12 @@
         <USelect
           v-model="filterYear"
           :items="yearItems"
-          @update:model-value="fetchAll"
+          @update:model-value="loadAll"
         />
         <USelect
           v-model="filterMonth"
           :items="monthItems"
-          @update:model-value="fetchIncomes"
+          @update:model-value="loadIncomes"
         />
       </div>
 
@@ -142,7 +142,7 @@
 
     <ModalIncomesDeleteConfirm
       v-model:open="showDeleteConfirm"
-      @confirm="deleteIncome"
+      @confirm="onDeleteIncome"
     />
     <ModalIncomesAdd
       v-model:open="addModalOpen"
@@ -151,7 +151,7 @@
       :project-items="projectItems"
       :income-type-items="incomeTypeItems"
       :initial-form="addForm"
-      @submit="addIncome"
+      @submit="onAddIncome"
     />
   </div>
 </template>
@@ -167,33 +167,17 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import type {
-  Income,
-  Project,
-  IncomeSummary,
-  TaxReport,
-  PaginatedResponse,
-} from '~/types/models';
+import type { Project, PaginatedResponse } from '~/types/models';
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  ArcElement,
-  Tooltip,
-  Legend,
-);
+ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Tooltip, Legend);
 
 definePageMeta({ middleware: 'auth' });
 
 const { $api } = useNuxtApp();
-const authStore = useAuthStore();
+const incomeStore = useIncomeStore();
+const { incomes, summary, taxReport, loading } = storeToRefs(incomeStore);
 
-const incomes = ref<Income[]>([]);
-const summary = ref<IncomeSummary | null>(null);
-const taxReport = ref<TaxReport | null>(null);
 const projects = ref<Project[]>([]);
-const loading = ref(false);
 const filterYear = ref(String(new Date().getFullYear()));
 const filterMonth = ref('all');
 const addModalOpen = ref(false);
@@ -244,32 +228,16 @@ const projectItems = computed(() => [
   ...projects.value.map((p) => ({ label: p.title, value: p.id })),
 ]);
 
-async function fetchIncomes() {
-  loading.value = true;
-  try {
-    const params: Record<string, string> = {};
-    if (filterYear.value) params.year = filterYear.value;
-    if (filterMonth.value !== 'all') params.month = filterMonth.value;
-    incomes.value = await $api<Income[]>(
-      '/incomes?' + new URLSearchParams(params).toString(),
-    );
-  } finally {
-    loading.value = false;
-  }
+async function loadIncomes() {
+  await incomeStore.fetchIncomes({ year: filterYear.value, month: filterMonth.value });
 }
 
-async function fetchAll() {
+async function loadAll() {
   filterMonth.value = 'all';
   await Promise.all([
-    fetchIncomes(),
-    (async () => {
-      summary.value = await $api<IncomeSummary>('/incomes/summary');
-    })(),
-    (async () => {
-      taxReport.value = await $api<TaxReport>(
-        `/incomes/tax-report?year=${filterYear.value}`,
-      );
-    })(),
+    loadIncomes(),
+    incomeStore.fetchSummary(),
+    incomeStore.fetchTaxReport(filterYear.value),
   ]);
 }
 
@@ -281,14 +249,14 @@ function confirmDelete(id: string) {
   showDeleteConfirm.value = true;
 }
 
-async function deleteIncome() {
+async function onDeleteIncome() {
   if (!deleteTargetId.value) return;
-  await ($api as any)(`/incomes/${deleteTargetId.value}`, { method: 'DELETE' });
+  await incomeStore.deleteIncome(deleteTargetId.value);
   showDeleteConfirm.value = false;
-  fetchIncomes();
+  await loadIncomes();
 }
 
-async function addIncome(form: typeof addForm) {
+async function onAddIncome(form: typeof addForm) {
   if (!form.projectId || form.projectId === 'none' || !form.amount) {
     addError.value = '필수 항목을 입력해주세요.';
     return;
@@ -296,9 +264,9 @@ async function addIncome(form: typeof addForm) {
   addLoading.value = true;
   addError.value = '';
   try {
-    await ($api as any)('/incomes', { method: 'POST', body: form });
+    await incomeStore.addIncome(form);
     addModalOpen.value = false;
-    fetchAll();
+    await loadAll();
   } catch (err: unknown) {
     addError.value =
       (err as { data?: { message?: string } })?.data?.message ||
@@ -308,10 +276,14 @@ async function addIncome(form: typeof addForm) {
   }
 }
 
+async function onDownloadPdf() {
+  await incomeStore.downloadPdf(filterYear.value);
+}
+
 onMounted(async () => {
   const res = await $api<PaginatedResponse<Project>>('/projects?limit=100');
   projects.value = res.data;
-  await fetchAll();
+  await loadAll();
 });
 
 // ── Chart data ──────────────────────────────────────────────────────────────
@@ -368,21 +340,4 @@ const doughnutOptions = {
     },
   },
 };
-
-// ── PDF download ──────────────────────────────────────────────────────────────
-
-async function downloadPdf() {
-  const config = useRuntimeConfig();
-  const url = `${config.public.apiBase}/incomes/report/pdf?year=${filterYear.value}`;
-  const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${authStore.accessToken}` },
-  });
-  if (!res.ok) return;
-  const blob = await res.blob();
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `income-report-${filterYear.value}.pdf`;
-  a.click();
-  URL.revokeObjectURL(a.href);
-}
 </script>

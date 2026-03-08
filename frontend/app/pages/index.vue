@@ -133,21 +133,15 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import type { DashboardData } from '~/types/models';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 definePageMeta({ middleware: 'auth' });
 
-const { $api } = useNuxtApp();
+const dashboardStore = useDashboardStore();
+const { dashboard } = storeToRefs(dashboardStore);
 
-const dashboard = ref<DashboardData | null>(null);
-
-onMounted(async () => {
-  try {
-    dashboard.value = await $api<DashboardData>('/dashboard');
-  } catch {}
-});
+onMounted(() => dashboardStore.fetchDashboard());
 
 const monthlyChartData = computed(() => ({
   labels: dashboard.value?.monthlyTrend?.map((t) => t.month) ?? [],

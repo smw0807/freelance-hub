@@ -19,7 +19,7 @@
             v-model="project.status"
             :items="statusItems"
             size="sm"
-            @update:model-value="updateStatus"
+            @update:model-value="onUpdateStatus"
           />
         </div>
       </div>
@@ -90,12 +90,12 @@
         v-model:open="showEdit"
         :platform-items="platformItems"
         :initial-form="editForm"
-        @save="saveEdit"
+        @save="onSaveEdit"
       />
       <ModalProjectPaidConfirm
         v-model:open="showPaidConfirm"
         :type="paidConfirmType"
-        @confirm="markPaid"
+        @confirm="onMarkPaid"
       />
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -109,13 +109,13 @@
                   v-model="newCheckItem"
                   size="sm"
                   placeholder="새 항목..."
-                  @keyup.enter="addCheckItem"
+                  @keyup.enter="onAddCheckItem"
                   class="w-40"
                 />
                 <UButton
                   size="sm"
                   icon="i-heroicons-plus"
-                  @click="addCheckItem"
+                  @click="onAddCheckItem"
                 />
               </div>
             </div>
@@ -128,7 +128,7 @@
             >
               <UCheckbox
                 :model-value="item.isDone"
-                @update:model-value="toggleCheckItem(item)"
+                @update:model-value="onToggleCheckItem(item)"
               />
               <span :class="{ 'line-through text-gray-400': item.isDone }">{{
                 item.title
@@ -138,7 +138,7 @@
                 variant="ghost"
                 size="xs"
                 icon="i-heroicons-x-mark"
-                @click="removeCheckItem(item.id)"
+                @click="onRemoveCheckItem(item.id)"
               />
             </div>
           </div>
@@ -188,16 +188,16 @@
 </template>
 
 <script setup lang="ts">
-import type { Project, ChecklistItem, TimeLog } from '~/types/models';
+import type { ChecklistItem, TimeLog } from '~/types/models';
 import { PLATFORM_ITEMS as platformItems } from '~/constants/platform';
 import { STATUS_ITEMS as statusItems } from '~/constants/project';
 
 definePageMeta({ middleware: 'auth' });
 
-const { $api } = useNuxtApp();
 const route = useRoute();
+const projectStore = useProjectStore();
+const { project } = storeToRefs(projectStore);
 
-const project = ref<Project | null>(null);
 const newCheckItem = ref('');
 const isTracking = ref(false);
 const showEdit = ref(false);
@@ -226,7 +226,7 @@ const totalMinutes = computed(
 );
 
 onMounted(async () => {
-  project.value = await $api<Project>(`/projects/${route.params.id}`);
+  await projectStore.fetchProject(route.params.id as string);
 });
 
 onUnmounted(() => {
@@ -251,7 +251,7 @@ function openEdit() {
   showEdit.value = true;
 }
 
-async function saveEdit(form: typeof editForm) {
+async function onSaveEdit(form: typeof editForm) {
   const body: Record<string, unknown> = {
     contractAmount: form.contractAmount,
     depositAmount: form.depositAmount,
@@ -259,15 +259,9 @@ async function saveEdit(form: typeof editForm) {
     platform: form.platform || null,
     memo: form.memo || null,
     startedAt: form.startedAt ? new Date(form.startedAt).toISOString() : null,
-    deadlineAt: form.deadlineAt
-      ? new Date(form.deadlineAt).toISOString()
-      : null,
+    deadlineAt: form.deadlineAt ? new Date(form.deadlineAt).toISOString() : null,
   };
-  const updated = await $api<Project>(`/projects/${project.value!.id}`, {
-    method: 'PATCH',
-    body,
-  });
-  Object.assign(project.value!, updated);
+  await projectStore.updateProject(project.value!.id, body);
   showEdit.value = false;
 }
 
@@ -276,84 +270,47 @@ function confirmPaid(type: 'deposit' | 'balance') {
   showPaidConfirm.value = true;
 }
 
-async function markPaid() {
-  const type = paidConfirmType.value;
-  const field = type === 'deposit' ? 'depositPaidAt' : 'balancePaidAt';
-  const today = new Date().toISOString();
-  await ($api as any)(`/projects/${project.value!.id}`, {
-    method: 'PATCH',
-    body: { [field]: today },
-  });
-  project.value![field] = today;
+async function onMarkPaid() {
+  await projectStore.markPaid(project.value!.id, paidConfirmType.value);
   showPaidConfirm.value = false;
 }
 
-async function updateStatus(status: string) {
-  await ($api as any)(`/projects/${project.value!.id}/status`, {
-    method: 'PATCH',
-    body: { status },
-  });
+async function onUpdateStatus(status: string) {
+  await projectStore.updateStatus(project.value!.id, status);
 }
 
-async function addCheckItem() {
+async function onAddCheckItem() {
   if (!newCheckItem.value.trim()) return;
-  const item = await $api<ChecklistItem>(
-    `/projects/${project.value!.id}/checklist`,
-    {
-      method: 'POST',
-      body: { title: newCheckItem.value },
-    },
-  );
-  project.value!.checklistItems.push(item);
+  await projectStore.addCheckItem(project.value!.id, newCheckItem.value);
   newCheckItem.value = '';
 }
 
-async function toggleCheckItem(item: ChecklistItem) {
-  item.isDone = !item.isDone;
-  await $api(`/projects/${project.value!.id}/checklist/${item.id}`, {
-    method: 'PATCH',
-    body: { isDone: item.isDone },
-  });
+async function onToggleCheckItem(item: ChecklistItem) {
+  await projectStore.toggleCheckItem(project.value!.id, item);
 }
 
-async function removeCheckItem(itemId: string) {
-  await $api(`/projects/${project.value!.id}/checklist/${itemId}`, {
-    method: 'DELETE',
-  });
-  project.value!.checklistItems = project.value!.checklistItems.filter(
-    (i) => i.id !== itemId,
-  );
+async function onRemoveCheckItem(itemId: string) {
+  await projectStore.removeCheckItem(project.value!.id, itemId);
 }
 
 async function toggleTimer() {
   const id = project.value!.id;
   if (!isTracking.value) {
-    // Start
-    const log = await $api<TimeLog>(`/projects/${id}/timelogs`, {
-      method: 'POST',
-      body: { startedAt: new Date().toISOString() },
-    });
+    const log = await projectStore.startTimer(id);
     activeLogId.value = log.id;
     timerStart.value = new Date();
     isTracking.value = true;
     timerInterval = setInterval(() => {
-      const diff = Math.floor(
-        (Date.now() - timerStart.value!.getTime()) / 1000,
-      );
+      const diff = Math.floor((Date.now() - timerStart.value!.getTime()) / 1000);
       const h = String(Math.floor(diff / 3600)).padStart(2, '0');
       const m = String(Math.floor((diff % 3600) / 60)).padStart(2, '0');
       const s = String(diff % 60).padStart(2, '0');
       elapsedTime.value = `${h}:${m}:${s}`;
     }, 1000);
   } else {
-    // Stop
     clearInterval(timerInterval!);
     timerInterval = null;
-    const log = await $api<TimeLog>(
-      `/projects/${id}/timelogs/${activeLogId.value}/stop`,
-      { method: 'PATCH' },
-    );
-    project.value!.timeLogs.unshift(log);
+    await projectStore.stopTimer(id, activeLogId.value!);
     isTracking.value = false;
     activeLogId.value = null;
     timerStart.value = null;

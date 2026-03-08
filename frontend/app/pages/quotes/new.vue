@@ -118,11 +118,12 @@
 </template>
 
 <script setup lang="ts">
-import type { Project, Quote, PaginatedResponse } from '~/types/models';
+import type { Project, PaginatedResponse } from '~/types/models';
 
 definePageMeta({ middleware: 'auth' });
 
 const { $api } = useNuxtApp();
+const quoteStore = useQuoteStore();
 
 const projects = ref<Project[]>([]);
 const loading = ref(false);
@@ -167,8 +168,7 @@ function recalculate() {
   });
   form.subtotal = form.items.reduce((s, i) => s + i.amount, 0);
   form.vatAmount = includeVat.value ? Math.round(form.subtotal * 0.1) : 0;
-  form.totalAmount =
-    form.subtotal + form.vatAmount - (form.discountAmount || 0);
+  form.totalAmount = form.subtotal + form.vatAmount - (form.discountAmount || 0);
 }
 
 async function onSubmit() {
@@ -180,7 +180,7 @@ async function onSubmit() {
   error.value = '';
   try {
     recalculate();
-    const quote = await $api<Quote>('/quotes', { method: 'POST', body: form });
+    const quote = await quoteStore.createQuote(form);
     await navigateTo(`/quotes/${quote.id}`);
   } catch (err: unknown) {
     error.value =
