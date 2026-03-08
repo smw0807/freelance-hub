@@ -6,7 +6,7 @@
     },
     {
       "source": "/api/(.*)",
-      "destination": "https://freelance-hub-backend.fly.dev/api/$1"
+      "destination": "http://ec2-50-19-164-89.compute-1.amazonaws.com/api/$1"
     }
   ]
 }
