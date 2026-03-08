@@ -61,9 +61,11 @@ export class ProjectsService {
   }
 
   async create(userId: string, dto: CreateProjectDto) {
-    return this.prisma.project.create({
-      data: { ...normalizeDates(dto), userId },
-    });
+    const data: any = { ...normalizeDates(dto), userId };
+    const now = new Date();
+    if (!dto.depositAmount && !data.depositPaidAt) data.depositPaidAt = now;
+    if (!dto.balanceAmount && !data.balancePaidAt) data.balancePaidAt = now;
+    return this.prisma.project.create({ data });
   }
 
   async update(userId: string, id: string, dto: UpdateProjectDto) {

@@ -107,7 +107,8 @@ const columns = [
 async function loadClients() {
   const params: Record<string, any> = { page: page.value };
   if (search.value) params.search = search.value;
-  if (blacklistFilter.value !== 'all') params.isBlacklisted = blacklistFilter.value;
+  if (blacklistFilter.value !== 'all')
+    params.isBlacklisted = blacklistFilter.value;
   await clientStore.fetchClients(params);
 }
 
