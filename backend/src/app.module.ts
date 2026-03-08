@@ -19,6 +19,8 @@ import { DashboardModule } from './dashboard/dashboard.module';
         PORT: Joi.number().optional(),
         APP_NAME: Joi.string().required(),
         APP_PORT: Joi.number().default(3002),
+        FRONTEND_URL: Joi.string().optional(),
+        CORS_ORIGINS: Joi.string().optional(),
         DATABASE_URL: Joi.string().required(),
         JWT_SECRET: Joi.string().required(),
         JWT_REFRESH_SECRET: Joi.string().required(),

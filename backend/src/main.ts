@@ -6,12 +6,20 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
+  const corsOrigins = (
+    configService.get<string>('CORS_ORIGINS') ??
+    configService.get<string>('FRONTEND_URL') ??
+    'http://localhost:3000,https://freelance-hub-indol.vercel.app'
+  )
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
 
   app.setGlobalPrefix('api');
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
 
   app.enableCors({
-    origin: ['http://localhost:3000'],
+    origin: corsOrigins,
     credentials: true,
   });
 
