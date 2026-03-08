@@ -19,6 +19,6 @@ jobs:
       - name: Build the Docker image
         run: docker build -t freelance-hub-backend ./backend
       - name: taging
-        run: docker tag freelance-hub-backend freelance-hub-backend:1.0.0
+        run: docker tag freelance-hub-backend smw0807/freelance-hub-backend:1.0.0
       - name: Push to Dockerhub
-        run: docker push freelance-hub-backend:1.0.0
+        run: docker push smw0807/freelance-hub-backend:1.0.0
