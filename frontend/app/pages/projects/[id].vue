@@ -169,13 +169,20 @@
               </UButton>
             </div>
           </template>
-          <div v-if="isTracking" class="text-center py-4">
-            <p class="text-3xl font-mono font-bold text-primary-500">
-              {{ elapsedTime }}
-            </p>
-            <p class="text-xs text-gray-500 mt-1">
-              {{ timerStart?.toLocaleTimeString('ko-KR') }} 부터
-            </p>
+          <div v-if="isTracking" class="space-y-3 py-2">
+            <div class="text-center">
+              <p class="text-3xl font-mono font-bold text-primary-500">
+                {{ elapsedTime }}
+              </p>
+              <p class="text-xs text-gray-500 mt-1">
+                {{ timerStart?.toLocaleTimeString('ko-KR') }} 부터
+              </p>
+            </div>
+            <UInput
+              v-model="trackingDescription"
+              placeholder="어떤 작업을 하셨나요? (선택)"
+              size="sm"
+            />
           </div>
           <div class="space-y-2 mt-2">
             <div
@@ -184,13 +191,13 @@
               class="flex items-center justify-between text-sm"
             >
               <span class="text-gray-600">{{ log.description || '작업' }}</span>
-              <span class="font-medium">{{
-                log.durationMinutes ? `${log.durationMinutes}분` : '진행중'
+              <span class="font-medium" :class="!log.endedAt ? 'text-primary-500' : ''">{{
+                log.endedAt ? formatDuration(log.startedAt, log.endedAt) : '진행중'
               }}</span>
             </div>
           </div>
           <div class="mt-3 pt-3 border-t text-sm font-medium">
-            총 작업시간: {{ totalMinutes }}분
+            총 작업시간: {{ formatTotalSeconds(totalSeconds) }}
           </div>
         </UCard>
       </div>
@@ -226,15 +233,34 @@ const editForm = reactive({
 const activeLogId = ref<string | null>(null);
 const timerStart = ref<Date | null>(null);
 const elapsedTime = ref('00:00:00');
+const trackingDescription = ref('');
 let timerInterval: ReturnType<typeof setInterval> | null = null;
 
-const totalMinutes = computed(
-  () =>
-    project.value?.timeLogs?.reduce(
-      (s: number, l: TimeLog) => s + (l.durationMinutes || 0),
-      0,
-    ) || 0,
+const totalSeconds = computed(() =>
+  project.value?.timeLogs?.reduce((s: number, l: TimeLog) => {
+    if (!l.endedAt) return s;
+    return s + Math.floor((new Date(l.endedAt).getTime() - new Date(l.startedAt).getTime()) / 1000);
+  }, 0) ?? 0,
 );
+
+function formatDuration(startedAt: string, endedAt: string): string {
+  const secs = Math.floor((new Date(endedAt).getTime() - new Date(startedAt).getTime()) / 1000);
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
+  if (m === 0) return `${s}초`;
+  return s === 0 ? `${m}분` : `${m}분 ${s}초`;
+}
+
+function formatTotalSeconds(secs: number): string {
+  const h = Math.floor(secs / 3600);
+  const m = Math.floor((secs % 3600) / 60);
+  const s = secs % 60;
+  const parts: string[] = [];
+  if (h > 0) parts.push(`${h}시간`);
+  if (m > 0) parts.push(`${m}분`);
+  if (s > 0 || parts.length === 0) parts.push(`${s}초`);
+  return parts.join(' ');
+}
 
 onMounted(async () => {
   await projectStore.fetchProject(route.params.id as string);
@@ -321,11 +347,12 @@ async function toggleTimer() {
   } else {
     clearInterval(timerInterval!);
     timerInterval = null;
-    await projectStore.stopTimer(id, activeLogId.value!);
+    await projectStore.stopTimer(id, activeLogId.value!, trackingDescription.value || undefined);
     isTracking.value = false;
     activeLogId.value = null;
     timerStart.value = null;
     elapsedTime.value = '00:00:00';
+    trackingDescription.value = '';
   }
 }
 </script>

@@ -122,7 +122,8 @@ export class ProjectsController {
     @CurrentUser() user: any,
     @Param('id') id: string,
     @Param('logId') logId: string,
+    @Body('description') description?: string,
   ) {
-    return this.projectsService.stopTimeLog(user.id, id, logId);
+    return this.projectsService.stopTimeLog(user.id, id, logId, description);
   }
 }

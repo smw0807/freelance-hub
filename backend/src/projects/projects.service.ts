@@ -154,7 +154,7 @@ export class ProjectsService {
     return this.prisma.timeLog.create({ data });
   }
 
-  async stopTimeLog(userId: string, projectId: string, logId: string) {
+  async stopTimeLog(userId: string, projectId: string, logId: string, description?: string) {
     await this.assertOwner(userId, projectId);
     const log = await this.prisma.timeLog.findUnique({ where: { id: logId } });
     if (!log) throw new NotFoundException();
@@ -164,7 +164,7 @@ export class ProjectsService {
     );
     return this.prisma.timeLog.update({
       where: { id: logId },
-      data: { endedAt, durationMinutes },
+      data: { endedAt, durationMinutes, ...(description ? { description } : {}) },
     });
   }
 }

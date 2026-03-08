@@ -89,10 +89,11 @@ export const useProjectStore = defineStore('project', () => {
     });
   };
 
-  const stopTimer = async (projectId: string, logId: string) => {
+  const stopTimer = async (projectId: string, logId: string, description?: string) => {
     const { $api } = useNuxtApp();
     const log = await ($api as any)<TimeLog>(`/projects/${projectId}/timelogs/${logId}/stop`, {
       method: 'PATCH',
+      body: description ? { description } : undefined,
     });
     if (project.value?.id === projectId) project.value.timeLogs.unshift(log);
     return log;
