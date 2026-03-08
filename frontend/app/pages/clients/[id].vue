@@ -4,7 +4,18 @@
       <div class="flex items-center gap-3">
         <UButton to="/clients" variant="ghost" icon="i-heroicons-arrow-left" />
         <div>
-          <h1 class="text-2xl font-bold">{{ client.name }}</h1>
+          <div class="flex items-center gap-2">
+            <h1 class="text-2xl font-bold">{{ client.name }}</h1>
+            <PageGuide
+              title="클라이언트 상세"
+              description="특정 클라이언트의 상세 정보를 확인하고 관리하는 화면입니다.
+
+• 클라이언트의 연락처, 플랫폼, 메모 등 등록된 모든 정보를 확인할 수 있습니다.
+• 총 프로젝트 수, 누적 계약금액, 미수금을 한눈에 볼 수 있습니다.
+• 연결된 프로젝트 목록을 확인하고 각 프로젝트 상세 페이지로 이동할 수 있습니다.
+• 우측 상단 '편집' 버튼으로 클라이언트 정보를 수정하거나 블랙리스트로 지정할 수 있습니다."
+            />
+          </div>
           <p class="text-gray-500 text-sm">{{ client.contactName }}</p>
         </div>
         <div class="ml-auto flex gap-2">

@@ -4,7 +4,18 @@
       <div class="flex items-center gap-3">
         <UButton to="/quotes" variant="ghost" icon="i-heroicons-arrow-left" />
         <div>
-          <h1 class="text-2xl font-bold">{{ quote.quoteNo }}</h1>
+          <div class="flex items-center gap-2">
+            <h1 class="text-2xl font-bold">{{ quote.quoteNo }}</h1>
+            <PageGuide
+              title="견적서 상세"
+              description="작성된 견적서의 내용을 확인하고 클라이언트와 공유하는 화면입니다.
+
+• 견적 항목, 단가, 수량, 합계를 확인할 수 있습니다.
+• PDF 다운로드 버튼으로 견적서를 파일로 저장할 수 있습니다.
+• '공유 링크' 버튼으로 클라이언트가 직접 열람할 수 있는 링크를 생성합니다.
+• 견적서 상태(초안 / 발송됨 / 수락됨 / 거절됨)를 변경해 진행 상황을 추적할 수 있습니다."
+            />
+          </div>
           <p class="text-gray-500 text-sm">{{ quote.project?.title }}</p>
         </div>
         <div class="ml-auto flex gap-2">

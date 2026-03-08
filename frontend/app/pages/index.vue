@@ -2,7 +2,17 @@
   <div class="flex-1 overflow-y-auto">
     <div class="p-6 space-y-6">
       <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold">대시보드</h1>
+        <div class="flex items-center gap-2">
+          <h1 class="text-2xl font-bold">대시보드</h1>
+          <PageGuide
+            title="대시보드"
+            description="프리랜서 활동의 전체 현황을 한눈에 확인하는 화면입니다.
+
+• 이번 달 수입 / 연간 누적 수입 / 미수금 합계를 요약 카드로 확인할 수 있습니다.
+• 최근 6개월 수입 트렌드를 막대 차트로 시각화합니다.
+• 마감이 임박한 프로젝트 목록과 아직 입금받지 못한 미수금 현황을 보여줍니다."
+          />
+        </div>
         <span class="text-sm text-gray-500">{{ currentMonth }}</span>
       </div>
 

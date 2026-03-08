@@ -2,7 +2,18 @@
   <div class="flex-1 overflow-y-auto">
     <div class="p-6 space-y-4">
       <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold">클라이언트</h1>
+        <div class="flex items-center gap-2">
+          <h1 class="text-2xl font-bold">클라이언트</h1>
+          <PageGuide
+            title="클라이언트"
+            description="함께 일하는 클라이언트(거래처)를 관리하는 화면입니다.
+
+• 이름, 이메일, 연락처, 플랫폼 등 클라이언트 정보를 등록하고 수정할 수 있습니다.
+• 블랙리스트 필터로 문제가 있는 클라이언트를 별도로 관리할 수 있습니다.
+• 클라이언트 이름을 클릭하면 상세 페이지로 이동해 연결된 프로젝트 현황을 확인할 수 있습니다.
+• 우측 상단 '새 클라이언트' 버튼으로 새 거래처를 등록하세요."
+          />
+        </div>
         <UButton to="/clients/new" icon="i-heroicons-plus"
           >새 클라이언트</UButton
         >

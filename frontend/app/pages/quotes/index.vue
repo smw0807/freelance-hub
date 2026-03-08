@@ -2,7 +2,18 @@
   <div class="flex-1 overflow-y-auto">
     <div class="p-6 space-y-4">
       <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold">견적서</h1>
+        <div class="flex items-center gap-2">
+          <h1 class="text-2xl font-bold">견적서</h1>
+          <PageGuide
+            title="견적서"
+            description="클라이언트에게 보낼 견적서를 작성하고 관리하는 화면입니다.
+
+• 항목별 단가와 수량을 입력해 견적서를 자동으로 생성합니다.
+• 완성된 견적서는 PDF로 다운로드하거나 공유 링크를 생성해 클라이언트에게 전달할 수 있습니다.
+• 공유 링크는 만료일을 설정할 수 있으며, 클라이언트는 로그인 없이 견적서를 열람할 수 있습니다.
+• 견적서 번호를 클릭하면 상세 페이지로 이동합니다."
+          />
+        </div>
         <UButton to="/quotes/new" icon="i-heroicons-plus">새 견적서</UButton>
       </div>
 

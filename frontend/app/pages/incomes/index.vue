@@ -2,7 +2,18 @@
   <div class="flex-1 overflow-y-auto">
     <div class="p-6 space-y-6">
       <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold">정산 / 세금</h1>
+        <div class="flex items-center gap-2">
+          <h1 class="text-2xl font-bold">정산 / 세금</h1>
+          <PageGuide
+            title="정산 / 세금"
+            description="수입 내역을 기록하고 세금 신고를 준비하는 화면입니다.
+
+• 프로젝트별 선금·잔금 수령 현황을 확인하고 직접 수입을 추가할 수 있습니다.
+• 연간 총 수입과 예상 종합소득세(3.3% 원천징수 기준)를 자동으로 계산합니다.
+• 연간 리포트를 PDF로 다운로드해 세금 신고 자료로 활용할 수 있습니다.
+• 세금 연도 필터로 원하는 연도의 수입 내역을 조회할 수 있습니다."
+          />
+        </div>
         <div class="flex gap-2">
           <UButton
             variant="outline"

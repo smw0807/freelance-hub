@@ -1,7 +1,17 @@
 <template>
   <div class="flex-1 overflow-y-auto">
     <div class="p-6 max-w-lg space-y-6">
-      <h1 class="text-2xl font-bold">설정</h1>
+      <div class="flex items-center gap-2">
+        <h1 class="text-2xl font-bold">설정</h1>
+        <PageGuide
+          title="설정"
+          description="계정 정보와 앱 환경을 설정하는 화면입니다.
+
+• 이름, 전화번호 등 프로필 정보를 수정할 수 있습니다.
+• 비밀번호를 변경할 수 있습니다 (소셜 로그인 계정은 제외).
+• 다크 모드 / 라이트 모드 테마를 전환할 수 있습니다."
+        />
+      </div>
 
       <UCard>
         <template #header>

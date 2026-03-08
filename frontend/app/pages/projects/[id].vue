@@ -4,7 +4,18 @@
       <div class="flex items-center gap-3">
         <UButton to="/projects" variant="ghost" icon="i-heroicons-arrow-left" />
         <div>
-          <h1 class="text-2xl font-bold">{{ project.title }}</h1>
+          <div class="flex items-center gap-2">
+            <h1 class="text-2xl font-bold">{{ project.title }}</h1>
+            <PageGuide
+              title="프로젝트 상세"
+              description="개별 프로젝트의 모든 정보를 확인하고 관리하는 화면입니다.
+
+• 계약금액, 선금/잔금 수령 현황, 마감일, 작업 상태를 확인하고 수정할 수 있습니다.
+• 체크리스트 항목을 추가해 작업 진행 단계를 관리할 수 있습니다.
+• 작업 로그에 날짜별 작업 내용과 소요 시간을 기록할 수 있습니다.
+• 선금/잔금 수령 완료 처리를 통해 수입이 정산 화면에 자동 반영됩니다."
+            />
+          </div>
           <p class="text-gray-500 text-sm">{{ project.client?.name }}</p>
         </div>
         <div class="ml-auto flex gap-2">

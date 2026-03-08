@@ -2,7 +2,18 @@
   <div class="flex-1 overflow-y-auto">
     <div class="p-6 space-y-4">
       <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold">프로젝트</h1>
+        <div class="flex items-center gap-2">
+          <h1 class="text-2xl font-bold">프로젝트</h1>
+          <PageGuide
+            title="프로젝트"
+            description="수행 중이거나 완료된 프로젝트를 관리하는 화면입니다.
+
+• 프로젝트 상태(진행 중 / 완료 / 보류)별로 탭을 전환해 볼 수 있습니다.
+• 계약금액, 선금, 잔금, 마감일을 등록하고 수금 현황을 추적합니다.
+• 체크리스트로 작업 단계를 관리하고, 작업 로그로 시간을 기록할 수 있습니다.
+• 프로젝트 이름을 클릭하면 상세 페이지에서 모든 정보를 확인하고 편집할 수 있습니다."
+          />
+        </div>
         <UButton to="/projects/new" icon="i-heroicons-plus"
           >새 프로젝트</UButton
         >
