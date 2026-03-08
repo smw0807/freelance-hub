@@ -25,7 +25,7 @@
             <UInput v-model="form.phone" class="w-full" placeholder="010-0000-0000" />
           </UFormField>
           <UFormField label="시간당 단가 (원)">
-            <UInput v-model.number="form.hourlyRate" type="number" class="w-full" />
+            <UInput v-model.number="form.hourlyRate" type="number" min="0" class="w-full" @keydown="(e) => ['-', 'e', 'E', '+'].includes(e.key) && e.preventDefault()" />
           </UFormField>
           <UAlert v-if="error" color="error" :description="error" />
           <UAlert v-if="success" color="success" description="저장되었습니다." />

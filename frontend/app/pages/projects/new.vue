@@ -34,7 +34,9 @@
               <UInput
                 v-model.number="form.contractAmount"
                 type="number"
+                min="0"
                 class="w-full"
+                @keydown="(e) => ['-', 'e', 'E', '+'].includes(e.key) && e.preventDefault()"
               />
             </UFormField>
             <UFormField label="플랫폼" name="platform">
@@ -54,14 +56,18 @@
               <UInput
                 v-model.number="form.depositAmount"
                 type="number"
+                min="0"
                 class="w-full"
+                @keydown="(e) => ['-', 'e', 'E', '+'].includes(e.key) && e.preventDefault()"
               />
             </UFormField>
             <UFormField label="잔금" name="balanceAmount">
               <UInput
                 v-model.number="form.balanceAmount"
                 type="number"
+                min="0"
                 class="w-full"
+                @keydown="(e) => ['-', 'e', 'E', '+'].includes(e.key) && e.preventDefault()"
               />
             </UFormField>
           </div>

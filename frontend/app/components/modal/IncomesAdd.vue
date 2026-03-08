@@ -9,7 +9,7 @@
           <USelect v-model="localForm.incomeType" :items="incomeTypeItems" class="w-full" />
         </UFormField>
         <UFormField label="금액 *">
-          <UInput v-model.number="localForm.amount" type="number" class="w-full" />
+          <UInput v-model.number="localForm.amount" type="number" min="0" class="w-full" @keydown="(e) => ['-', 'e', 'E', '+'].includes(e.key) && e.preventDefault()" />
         </UFormField>
         <UFormField label="지급일 *">
           <UInput v-model="localForm.paidAt" type="date" class="w-full" />

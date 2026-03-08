@@ -3,13 +3,13 @@
     <template #body>
       <div class="space-y-4">
         <UFormField label="계약금액">
-          <UInput v-model.number="localForm.contractAmount" type="number" />
+          <UInput v-model.number="localForm.contractAmount" type="number" min="0" @keydown="(e) => ['-', 'e', 'E', '+'].includes(e.key) && e.preventDefault()" />
         </UFormField>
         <UFormField label="선금">
-          <UInput v-model.number="localForm.depositAmount" type="number" />
+          <UInput v-model.number="localForm.depositAmount" type="number" min="0" @keydown="(e) => ['-', 'e', 'E', '+'].includes(e.key) && e.preventDefault()" />
         </UFormField>
         <UFormField label="잔금">
-          <UInput v-model.number="localForm.balanceAmount" type="number" />
+          <UInput v-model.number="localForm.balanceAmount" type="number" min="0" @keydown="(e) => ['-', 'e', 'E', '+'].includes(e.key) && e.preventDefault()" />
         </UFormField>
         <UFormField label="플랫폼">
           <USelect v-model="localForm.platform" :items="platformItems" />

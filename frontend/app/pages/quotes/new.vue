@@ -44,14 +44,18 @@
                 <UInput
                   v-model.number="item.quantity"
                   type="number"
+                  min="0"
                   placeholder="수량"
                   class="col-span-2"
+                  @keydown="(e) => ['-', 'e', 'E', '+'].includes(e.key) && e.preventDefault()"
                 />
                 <UInput
                   v-model.number="item.unitPrice"
                   type="number"
+                  min="0"
                   placeholder="단가"
                   class="col-span-3"
+                  @keydown="(e) => ['-', 'e', 'E', '+'].includes(e.key) && e.preventDefault()"
                 />
                 <div class="col-span-1 text-right text-sm">
                   ₩{{ (item.amount || 0).toLocaleString() }}
@@ -84,8 +88,10 @@
                 <UInput
                   v-model.number="form.discountAmount"
                   type="number"
+                  min="0"
                   size="sm"
                   class="w-32"
+                  @keydown="(e) => ['-', 'e', 'E', '+'].includes(e.key) && e.preventDefault()"
                 />
               </div>
               <div class="flex justify-between font-bold border-t pt-2">
