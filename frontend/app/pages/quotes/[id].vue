@@ -133,9 +133,10 @@ const { quote, shareLoading } = storeToRefs(quoteStore);
 const shareModalOpen = ref(false);
 const shareForm = reactive({ expiresAt: '' });
 
+const requestUrl = useRequestURL();
 const shareUrl = computed(() =>
   quote.value?.shareToken
-    ? `${config.public.apiBase.replace(':3002', ':3000')}/q/${quote.value.shareToken}`
+    ? `${requestUrl.origin}/q/${quote.value.shareToken}`
     : '',
 );
 
