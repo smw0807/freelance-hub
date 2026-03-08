@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import * as Joi from 'joi';
+import { WinstonModule } from 'nest-winston';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
@@ -10,12 +12,15 @@ import { ProjectsModule } from './projects/projects.module';
 import { QuotesModule } from './quotes/quotes.module';
 import { IncomesModule } from './incomes/incomes.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { winstonConfig } from './logger/logger.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       validationSchema: Joi.object({
+        NODE_ENV: Joi.string().optional(),
         PORT: Joi.number().optional(),
         APP_NAME: Joi.string().required(),
         APP_PORT: Joi.number().default(3002),
@@ -28,6 +33,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
         KAKAO_REDIRECT_URI: Joi.string().required(),
       }),
     }),
+    WinstonModule.forRoot(winstonConfig),
     PrismaModule,
     AuthModule,
     ClientsModule,
@@ -37,6 +43,9 @@ import { DashboardModule } from './dashboard/dashboard.module';
     DashboardModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    { provide: APP_INTERCEPTOR, useClass: LoggingInterceptor },
+  ],
 })
 export class AppModule {}

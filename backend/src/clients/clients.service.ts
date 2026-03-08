@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateClientDto } from './dto/create-client.dto';
 import { UpdateClientDto } from './dto/update-client.dto';
@@ -6,6 +6,8 @@ import { QueryClientDto } from './dto/query-client.dto';
 
 @Injectable()
 export class ClientsService {
+  private readonly logger = new Logger(ClientsService.name);
+
   constructor(private prisma: PrismaService) {}
 
   async findAll(userId: string, query: QueryClientDto) {
@@ -39,21 +41,28 @@ export class ClientsService {
     const client = await this.prisma.client.findFirst({
       where: { id, userId, deletedAt: null },
     });
-    if (!client) throw new NotFoundException('클라이언트를 찾을 수 없습니다.');
+    if (!client) {
+      this.logger.warn(`Client not found: id=${id} userId=${userId}`);
+      throw new NotFoundException('클라이언트를 찾을 수 없습니다.');
+    }
     return client;
   }
 
   async create(userId: string, dto: CreateClientDto) {
-    return this.prisma.client.create({ data: { ...dto, userId } });
+    const client = await this.prisma.client.create({ data: { ...dto, userId } });
+    this.logger.log(`Client created: id=${client.id} name=${client.name}`);
+    return client;
   }
 
   async update(userId: string, id: string, dto: UpdateClientDto) {
     await this.findOne(userId, id);
+    this.logger.log(`Client updated: id=${id}`);
     return this.prisma.client.update({ where: { id }, data: dto });
   }
 
   async remove(userId: string, id: string) {
     await this.findOne(userId, id);
+    this.logger.log(`Client deleted (soft): id=${id}`);
     return this.prisma.client.update({
       where: { id },
       data: { deletedAt: new Date() },

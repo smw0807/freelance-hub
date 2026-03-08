@@ -40,6 +40,7 @@ source "${ENV_FILE}"
 set +a
 
 required_vars=(
+  NODE_ENV
   APP_NAME
   APP_PORT
   DATABASE_URL
@@ -65,6 +66,7 @@ fi
 
 echo "Fly secrets 업데이트 중..."
 fly secrets set --app "${APP_NAME}" \
+  NODE_ENV="${NODE_ENV}" \
   APP_NAME="${APP_NAME}" \
   APP_PORT="${APP_PORT}" \
   DATABASE_URL="${DATABASE_URL}" \

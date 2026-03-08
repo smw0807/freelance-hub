@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -13,6 +14,8 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
@@ -23,13 +26,17 @@ export class AuthService {
     const existing = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
-    if (existing) throw new BadRequestException('이미 사용 중인 이메일입니다.');
+    if (existing) {
+      this.logger.warn(`Register failed - email already exists: ${dto.email}`);
+      throw new BadRequestException('이미 사용 중인 이메일입니다.');
+    }
 
     const password = await bcrypt.hash(dto.password, 10);
     const user = await this.prisma.user.create({
       data: { email: dto.email, name: dto.name, phone: dto.phone, password },
     });
 
+    this.logger.log(`User registered: ${user.email} (id=${user.id})`);
     return this.issueTokens(user.id, user.email);
   }
 
@@ -37,17 +44,22 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({
       where: { email: dto.email },
     });
-    if (!user || !user.password)
+    if (!user || !user.password) {
+      this.logger.warn(`Login failed - user not found: ${dto.email}`);
       throw new UnauthorizedException(
         '이메일 또는 비밀번호가 올바르지 않습니다.',
       );
+    }
 
     const valid = await bcrypt.compare(dto.password, user.password);
-    if (!valid)
+    if (!valid) {
+      this.logger.warn(`Login failed - wrong password: ${dto.email}`);
       throw new UnauthorizedException(
         '이메일 또는 비밀번호가 올바르지 않습니다.',
       );
+    }
 
+    this.logger.log(`User logged in: ${user.email} (id=${user.id})`);
     return this.issueTokens(user.id, user.email);
   }
 
@@ -65,6 +77,7 @@ export class AuthService {
         where: { email: kakaoUser.email },
       });
       if (user) {
+        this.logger.log(`Kakao: linking kakaoOauthId to existing user ${user.email}`);
         user = await this.prisma.user.update({
           where: { id: user.id },
           data: { kakaoOauthId: kakaoUser.kakaoOauthId },
@@ -82,12 +95,16 @@ export class AuthService {
           kakaoOauthId: kakaoUser.kakaoOauthId,
         },
       });
+      this.logger.log(`Kakao: new user created ${user.email} (id=${user.id})`);
+    } else {
+      this.logger.log(`Kakao: user logged in ${user.email} (id=${user.id})`);
     }
 
     return this.issueTokens(user.id, user.email);
   }
 
   async kakaoCodeLogin(code: string, redirectUri: string) {
+    this.logger.log(`Kakao code login: redirectUri=${redirectUri}`);
     const tokenRes = await fetch('https://kauth.kakao.com/oauth/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },

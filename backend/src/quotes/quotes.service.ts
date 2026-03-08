@@ -1,5 +1,6 @@
 import {
   Injectable,
+  Logger,
   NotFoundException,
   ForbiddenException,
 } from '@nestjs/common';
@@ -13,6 +14,8 @@ import { randomBytes } from 'crypto';
 
 @Injectable()
 export class QuotesService {
+  private readonly logger = new Logger(QuotesService.name);
+
   constructor(
     private prisma: PrismaService,
     private pdfService: PdfService,
@@ -79,6 +82,7 @@ export class QuotesService {
       ? new Date(dto.expiresAt)
       : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
 
+    this.logger.log(`Quote shared: id=${id} expiresAt=${expiresAt.toISOString()}`);
     return this.prisma.quote.update({
       where: { id },
       data: { shareToken, expiresAt, status: 'SENT' },
@@ -90,8 +94,12 @@ export class QuotesService {
       where: { shareToken: token },
       include: { project: { select: { title: true, client: true } } },
     });
-    if (!quote) throw new NotFoundException('견적서를 찾을 수 없습니다.');
+    if (!quote) {
+      this.logger.warn(`Public quote not found: token=${token.slice(0, 8)}...`);
+      throw new NotFoundException('견적서를 찾을 수 없습니다.');
+    }
     if (quote.expiresAt && quote.expiresAt < new Date()) {
+      this.logger.warn(`Public quote expired: id=${quote.id}`);
       await this.prisma.quote.update({
         where: { id: quote.id },
         data: { status: 'EXPIRED' },
@@ -122,8 +130,12 @@ export class QuotesService {
   }
 
   async generatePdf(userId: string, id: string): Promise<Buffer> {
+    this.logger.log(`Generating PDF for quote id=${id}`);
+    const start = Date.now();
     const quote = await this.findOne(userId, id);
     const html = generateQuoteHtml(quote as any);
-    return this.pdfService.generatePdf(html);
+    const buffer = await this.pdfService.generatePdf(html);
+    this.logger.log(`PDF generated for quote id=${id} size=${buffer.length}b +${Date.now() - start}ms`);
+    return buffer;
   }
 }

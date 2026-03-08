@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { normalizeDates } from '../common/utils/date.util';
 import { CreateIncomeDto } from './dto/create-income.dto';
@@ -16,6 +16,8 @@ const PLATFORM_LABEL: Record<string, string> = {
 
 @Injectable()
 export class IncomesService {
+  private readonly logger = new Logger(IncomesService.name);
+
   constructor(private prisma: PrismaService) {}
 
   async findAll(userId: string, query: QueryIncomeDto) {
@@ -48,28 +50,37 @@ export class IncomesService {
     const project = await this.prisma.project.findFirst({
       where: { id: dto.projectId, userId },
     });
-    if (!project) throw new NotFoundException('프로젝트를 찾을 수 없습니다.');
+    if (!project) {
+      this.logger.warn(`Income create failed - project not found: projectId=${dto.projectId} userId=${userId}`);
+      throw new NotFoundException('프로젝트를 찾을 수 없습니다.');
+    }
 
     const isWithholdingTax = dto.isWithholdingTax ?? false;
     const netAmount = isWithholdingTax
       ? Math.round(dto.amount * 0.967)
       : dto.amount;
 
-    return this.prisma.income.create({
+    const income = await this.prisma.income.create({
       data: { ...normalizeDates(dto), userId, isWithholdingTax, netAmount },
     });
+    this.logger.log(`Income created: id=${income.id} amount=${dto.amount} netAmount=${netAmount} projectId=${dto.projectId}`);
+    return income;
   }
 
   async update(userId: string, id: string, dto: UpdateIncomeDto) {
     const income = await this.prisma.income.findFirst({
       where: { id, userId },
     });
-    if (!income) throw new NotFoundException('수입을 찾을 수 없습니다.');
+    if (!income) {
+      this.logger.warn(`Income update failed - not found: id=${id} userId=${userId}`);
+      throw new NotFoundException('수입을 찾을 수 없습니다.');
+    }
 
     const amount = dto.amount ?? income.amount;
     const isWithholdingTax = dto.isWithholdingTax ?? income.isWithholdingTax;
     const netAmount = isWithholdingTax ? Math.round(amount * 0.967) : amount;
 
+    this.logger.log(`Income updated: id=${id} netAmount=${netAmount}`);
     return this.prisma.income.update({
       where: { id },
       data: { ...normalizeDates(dto), netAmount },
@@ -80,7 +91,11 @@ export class IncomesService {
     const income = await this.prisma.income.findFirst({
       where: { id, userId },
     });
-    if (!income) throw new NotFoundException('수입을 찾을 수 없습니다.');
+    if (!income) {
+      this.logger.warn(`Income delete failed - not found: id=${id} userId=${userId}`);
+      throw new NotFoundException('수입을 찾을 수 없습니다.');
+    }
+    this.logger.log(`Income deleted: id=${id}`);
     return this.prisma.income.delete({ where: { id } });
   }
 
