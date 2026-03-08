@@ -4,7 +4,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKEND_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 FLY_TOML="${BACKEND_DIR}/fly.toml"
-ENV_FILE="${BACKEND_DIR}/.env"
+ENV_FILE="${BACKEND_DIR}/.env.production"
 
 cd "${BACKEND_DIR}"
 
