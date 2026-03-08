@@ -119,6 +119,11 @@ onMounted(async () => {
   clients.value = res.data;
 });
 
+watch(() => form.clientId, (clientId) => {
+  const found = clients.value.find((c) => c.id === clientId);
+  if (found) form.platform = found.platform;
+});
+
 async function onSubmit() {
   if (!form.title) {
     error.value = '프로젝트명은 필수입니다.';
