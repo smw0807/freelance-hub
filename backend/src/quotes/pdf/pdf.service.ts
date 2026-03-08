@@ -78,7 +78,6 @@ export class PdfService implements OnModuleDestroy {
           format: 'A4',
           margin: { top: '20mm', right: '20mm', bottom: '20mm', left: '20mm' },
           printBackground: true,
-          timeout: TIMEOUT_MS,
         });
         this.logger.log(`PDF 생성 완료 +${Date.now() - start}ms`);
         return Buffer.from(pdf);
