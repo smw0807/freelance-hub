@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/_nuxt_icon/(.*)",
+      "destination": "/_nuxt_icon/$1"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "https://freelance-hub-backend.fly.dev/api/$1"
     }
