@@ -76,7 +76,7 @@
       </div>
     </div>
 
-    <ClientsDeleteConfirmModal
+    <ModalClientsDeleteConfirm
       v-model:open="showDeleteConfirm"
       @confirm="deleteClient"
     />

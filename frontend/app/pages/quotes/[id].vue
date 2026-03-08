@@ -102,7 +102,7 @@
       </UCard>
     </div>
 
-    <QuoteShareModal
+    <ModalQuoteShare
       v-model:open="shareModalOpen"
       :loading="shareLoading"
       :initial-expires-at="shareForm.expiresAt"

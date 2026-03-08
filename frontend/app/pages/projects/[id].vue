@@ -86,13 +86,13 @@
         </UCard>
       </div>
 
-      <ProjectEditModal
+      <ModalProjectEdit
         v-model:open="showEdit"
         :platform-items="platformItems"
         :initial-form="editForm"
         @save="saveEdit"
       />
-      <ProjectPaidConfirmModal
+      <ModalProjectPaidConfirm
         v-model:open="showPaidConfirm"
         :type="paidConfirmType"
         @confirm="markPaid"
@@ -217,7 +217,6 @@ const timerStart = ref<Date | null>(null);
 const elapsedTime = ref('00:00:00');
 let timerInterval: ReturnType<typeof setInterval> | null = null;
 
-
 const totalMinutes = computed(
   () =>
     project.value?.timeLogs?.reduce(
@@ -259,9 +258,7 @@ async function saveEdit(form: typeof editForm) {
     balanceAmount: form.balanceAmount,
     platform: form.platform || null,
     memo: form.memo || null,
-    startedAt: form.startedAt
-      ? new Date(form.startedAt).toISOString()
-      : null,
+    startedAt: form.startedAt ? new Date(form.startedAt).toISOString() : null,
     deadlineAt: form.deadlineAt
       ? new Date(form.deadlineAt).toISOString()
       : null,

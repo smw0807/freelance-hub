@@ -8,7 +8,8 @@
             variant="outline"
             icon="i-heroicons-document-arrow-down"
             @click="downloadPdf"
-          >연간 리포트</UButton>
+            >연간 리포트</UButton
+          >
           <UButton icon="i-heroicons-plus" @click="addModalOpen = true"
             >수입 추가</UButton
           >
@@ -48,11 +49,17 @@
         <UCard>
           <template #header><h2 class="font-semibold">월별 수입</h2></template>
           <ClientOnly>
-            <Bar :data="monthlyChartData" :options="barOptions" class="max-h-52" />
+            <Bar
+              :data="monthlyChartData"
+              :options="barOptions"
+              class="max-h-52"
+            />
           </ClientOnly>
         </UCard>
         <UCard>
-          <template #header><h2 class="font-semibold">플랫폼별 수입</h2></template>
+          <template #header
+            ><h2 class="font-semibold">플랫폼별 수입</h2></template
+          >
           <ClientOnly>
             <Doughnut
               v-if="summary.platformBreakdown?.length"
@@ -60,7 +67,12 @@
               :options="doughnutOptions"
               class="max-h-52"
             />
-            <div v-else class="flex items-center justify-center h-52 text-gray-400 text-sm">데이터 없음</div>
+            <div
+              v-else
+              class="flex items-center justify-center h-52 text-gray-400 text-sm"
+            >
+              데이터 없음
+            </div>
           </ClientOnly>
         </UCard>
       </div>
@@ -128,11 +140,11 @@
       </UCard>
     </div>
 
-    <IncomesDeleteConfirmModal
+    <ModalIncomesDeleteConfirm
       v-model:open="showDeleteConfirm"
       @confirm="deleteIncome"
     />
-    <IncomesAddModal
+    <ModalIncomesAdd
       v-model:open="addModalOpen"
       :loading="addLoading"
       :error="addError"
@@ -163,7 +175,14 @@ import type {
   PaginatedResponse,
 } from '~/types/models';
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Tooltip, Legend);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  ArcElement,
+  Tooltip,
+  Legend,
+);
 
 definePageMeta({ middleware: 'auth' });
 
