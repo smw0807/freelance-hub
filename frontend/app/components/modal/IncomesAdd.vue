@@ -54,6 +54,7 @@ const props = defineProps<{
   projectItems: SelectItem[];
   incomeTypeItems: SelectItem[];
   initialForm: AddIncomeForm;
+  projectAmounts: Record<string, { depositAmount: number; balanceAmount: number }>;
 }>();
 
 const emit = defineEmits<{
@@ -68,6 +69,16 @@ watch(
   (isOpen) => {
     if (!isOpen) return;
     Object.assign(localForm, props.initialForm);
+  },
+);
+
+watch(
+  [() => localForm.projectId, () => localForm.incomeType],
+  ([projectId, incomeType]) => {
+    const amounts = props.projectAmounts[projectId];
+    if (!amounts) return;
+    if (incomeType === 'DEPOSIT') localForm.amount = amounts.depositAmount;
+    else if (incomeType === 'BALANCE') localForm.amount = amounts.balanceAmount;
   },
 );
 </script>

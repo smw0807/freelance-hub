@@ -151,6 +151,7 @@
       :project-items="projectItems"
       :income-type-items="incomeTypeItems"
       :initial-form="addForm"
+      :project-amounts="projectAmounts"
       @submit="onAddIncome"
     />
   </div>
@@ -227,6 +228,15 @@ const projectItems = computed(() => [
   { label: '선택...', value: 'none' },
   ...projects.value.map((p) => ({ label: p.title, value: p.id })),
 ]);
+
+const projectAmounts = computed(() =>
+  Object.fromEntries(
+    projects.value.map((p) => [
+      p.id,
+      { depositAmount: p.depositAmount, balanceAmount: p.balanceAmount },
+    ]),
+  ),
+);
 
 async function loadIncomes() {
   await incomeStore.fetchIncomes({ year: filterYear.value, month: filterMonth.value });
