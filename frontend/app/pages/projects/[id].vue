@@ -86,63 +86,17 @@
         </UCard>
       </div>
 
-      <!-- Edit Modal -->
-      <UModal v-model:open="showEdit" title="프로젝트 편집">
-        <template #body>
-          <div class="space-y-4">
-            <UFormField label="계약금액">
-              <UInput v-model.number="editForm.contractAmount" type="number" />
-            </UFormField>
-            <UFormField label="선금">
-              <UInput v-model.number="editForm.depositAmount" type="number" />
-            </UFormField>
-            <UFormField label="잔금">
-              <UInput v-model.number="editForm.balanceAmount" type="number" />
-            </UFormField>
-            <UFormField label="플랫폼">
-              <USelect v-model="editForm.platform" :items="platformItems" />
-            </UFormField>
-            <UFormField label="시작일">
-              <UInput v-model="editForm.startedAt" type="date" />
-            </UFormField>
-            <UFormField label="마감일">
-              <UInput v-model="editForm.deadlineAt" type="date" />
-            </UFormField>
-            <UFormField label="메모">
-              <UTextarea v-model="editForm.memo" :rows="3" />
-            </UFormField>
-          </div>
-        </template>
-        <template #footer>
-          <div class="flex justify-end gap-2">
-            <UButton variant="ghost" @click="showEdit = false">취소</UButton>
-            <UButton @click="saveEdit">저장</UButton>
-          </div>
-        </template>
-      </UModal>
-
-      <!-- 수령 확인 Modal -->
-      <UModal
+      <ProjectEditModal
+        v-model:open="showEdit"
+        :platform-items="platformItems"
+        :initial-form="editForm"
+        @save="saveEdit"
+      />
+      <ProjectPaidConfirmModal
         v-model:open="showPaidConfirm"
-        :title="
-          paidConfirmType === 'deposit' ? '선금 수령 확인' : '잔금 수령 확인'
-        "
-      >
-        <template #body>
-          <p class="text-sm text-white">
-            {{ paidConfirmType === 'deposit' ? '선금' : '잔금' }}을 수령 완료
-            처리하시겠습니까?
-          </p>
-        </template>
-        <template #footer>
-          <div class="flex justify-end gap-2">
-            <UButton variant="ghost" @click="showPaidConfirm = false"
-              >취소</UButton
-            >
-            <UButton color="primary" @click="markPaid">확인</UButton>
-          </div>
-        </template>
-      </UModal>
+        :type="paidConfirmType"
+        @confirm="markPaid"
+      />
 
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <!-- Checklist -->
@@ -298,18 +252,18 @@ function openEdit() {
   showEdit.value = true;
 }
 
-async function saveEdit() {
+async function saveEdit(form: typeof editForm) {
   const body: Record<string, unknown> = {
-    contractAmount: editForm.contractAmount,
-    depositAmount: editForm.depositAmount,
-    balanceAmount: editForm.balanceAmount,
-    platform: editForm.platform || null,
-    memo: editForm.memo || null,
-    startedAt: editForm.startedAt
-      ? new Date(editForm.startedAt).toISOString()
+    contractAmount: form.contractAmount,
+    depositAmount: form.depositAmount,
+    balanceAmount: form.balanceAmount,
+    platform: form.platform || null,
+    memo: form.memo || null,
+    startedAt: form.startedAt
+      ? new Date(form.startedAt).toISOString()
       : null,
-    deadlineAt: editForm.deadlineAt
-      ? new Date(editForm.deadlineAt).toISOString()
+    deadlineAt: form.deadlineAt
+      ? new Date(form.deadlineAt).toISOString()
       : null,
   };
   const updated = await $api<Project>(`/projects/${project.value!.id}`, {

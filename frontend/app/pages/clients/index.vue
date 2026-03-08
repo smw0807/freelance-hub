@@ -76,18 +76,10 @@
       </div>
     </div>
 
-    <!-- 삭제 확인 Modal -->
-    <UModal v-model:open="showDeleteConfirm" title="클라이언트 삭제">
-      <template #body>
-        <p class="text-sm text-gray-600">정말 삭제하시겠습니까?</p>
-      </template>
-      <template #footer>
-        <div class="flex justify-end gap-2">
-          <UButton variant="ghost" @click="showDeleteConfirm = false">취소</UButton>
-          <UButton color="error" @click="deleteClient">삭제</UButton>
-        </div>
-      </template>
-    </UModal>
+    <ClientsDeleteConfirmModal
+      v-model:open="showDeleteConfirm"
+      @confirm="deleteClient"
+    />
   </div>
 </template>
 

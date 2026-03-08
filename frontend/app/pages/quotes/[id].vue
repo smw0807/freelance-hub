@@ -102,23 +102,12 @@
       </UCard>
     </div>
 
-    <!-- Share Modal -->
-    <UModal v-model:open="shareModalOpen" title="공유 링크 생성">
-      <template #body>
-        <div class="space-y-4 p-4">
-          <UFormField label="만료일">
-            <UInput v-model="shareForm.expiresAt" type="date" class="w-full" />
-          </UFormField>
-          <UButton
-            class="w-full justify-center"
-            :loading="shareLoading"
-            @click="createShareLink"
-          >
-            링크 생성
-          </UButton>
-        </div>
-      </template>
-    </UModal>
+    <QuoteShareModal
+      v-model:open="shareModalOpen"
+      :loading="shareLoading"
+      :initial-expires-at="shareForm.expiresAt"
+      @submit="createShareLink"
+    />
   </div>
 </template>
 
@@ -146,12 +135,11 @@ onMounted(async () => {
   quote.value = await $api<Quote>(`/quotes/${route.params.id}`);
 });
 
-async function createShareLink() {
+async function createShareLink(expiresAt: string) {
   shareLoading.value = true;
   try {
     const body: Record<string, string> = {};
-    if (shareForm.expiresAt)
-      body.expiresAt = new Date(shareForm.expiresAt).toISOString();
+    if (expiresAt) body.expiresAt = new Date(expiresAt).toISOString();
     const updated = await $api<Partial<Quote>>(
       `/quotes/${quote.value!.id}/share`,
       { method: 'POST', body },

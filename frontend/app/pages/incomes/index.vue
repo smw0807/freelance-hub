@@ -128,66 +128,19 @@
       </UCard>
     </div>
 
-    <!-- 삭제 확인 Modal -->
-    <UModal v-model:open="showDeleteConfirm" title="수입 삭제">
-      <template #body>
-        <p class="text-sm text-gray-600">정말 삭제하시겠습니까?</p>
-      </template>
-      <template #footer>
-        <div class="flex justify-end gap-2">
-          <UButton variant="ghost" @click="showDeleteConfirm = false">취소</UButton>
-          <UButton color="error" @click="deleteIncome">삭제</UButton>
-        </div>
-      </template>
-    </UModal>
-
-    <!-- Add Modal -->
-    <UModal v-model:open="addModalOpen" title="수입 추가">
-      <template #body>
-        <div class="p-4 space-y-4">
-          <UFormField label="프로젝트 *">
-            <USelect
-              v-model="addForm.projectId"
-              :items="projectItems"
-              class="w-full"
-            />
-          </UFormField>
-          <UFormField label="유형">
-            <USelect
-              v-model="addForm.incomeType"
-              :items="incomeTypeItems"
-              class="w-full"
-            />
-          </UFormField>
-          <UFormField label="금액 *">
-            <UInput
-              v-model.number="addForm.amount"
-              type="number"
-              class="w-full"
-            />
-          </UFormField>
-          <UFormField label="지급일 *">
-            <UInput v-model="addForm.paidAt" type="date" class="w-full" />
-          </UFormField>
-          <UFormField label="원천징수">
-            <UCheckbox
-              v-model="addForm.isWithholdingTax"
-              label="원천징수 적용 (3.3%)"
-            />
-          </UFormField>
-          <UFormField label="메모">
-            <UInput v-model="addForm.memo" class="w-full" />
-          </UFormField>
-          <UAlert v-if="addError" color="error" :description="addError" />
-          <UButton
-            class="w-full justify-center"
-            :loading="addLoading"
-            @click="addIncome"
-            >저장</UButton
-          >
-        </div>
-      </template>
-    </UModal>
+    <IncomesDeleteConfirmModal
+      v-model:open="showDeleteConfirm"
+      @confirm="deleteIncome"
+    />
+    <IncomesAddModal
+      v-model:open="addModalOpen"
+      :loading="addLoading"
+      :error="addError"
+      :project-items="projectItems"
+      :income-type-items="incomeTypeItems"
+      :initial-form="addForm"
+      @submit="addIncome"
+    />
   </div>
 </template>
 
@@ -316,15 +269,15 @@ async function deleteIncome() {
   fetchIncomes();
 }
 
-async function addIncome() {
-  if (!addForm.projectId || addForm.projectId === 'none' || !addForm.amount) {
+async function addIncome(form: typeof addForm) {
+  if (!form.projectId || form.projectId === 'none' || !form.amount) {
     addError.value = '필수 항목을 입력해주세요.';
     return;
   }
   addLoading.value = true;
   addError.value = '';
   try {
-    await ($api as any)('/incomes', { method: 'POST', body: addForm });
+    await ($api as any)('/incomes', { method: 'POST', body: form });
     addModalOpen.value = false;
     fetchAll();
   } catch (err: unknown) {
