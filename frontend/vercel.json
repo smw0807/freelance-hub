@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "https://freelance-hub-backend.fly.dev/api/$1"
+    }
+  ]
+}
