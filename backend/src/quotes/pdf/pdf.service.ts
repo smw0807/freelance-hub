@@ -4,7 +4,14 @@ import { Injectable } from '@nestjs/common';
 export class PdfService {
   async generatePdf(html: string): Promise<Buffer> {
     const { chromium } = await import('playwright');
-    const browser = await chromium.launch({ args: ['--no-sandbox'] });
+    const browser = await chromium.launch({
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+      ],
+    });
     try {
       const page = await browser.newPage();
       await page.setContent(html, { waitUntil: 'networkidle' });
