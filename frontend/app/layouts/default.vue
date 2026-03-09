@@ -73,6 +73,7 @@ const navItems = [
   { to: '/clients', label: '클라이언트', icon: 'i-heroicons-users' },
   { to: '/projects', label: '프로젝트', icon: 'i-heroicons-folder' },
   { to: '/quotes', label: '견적서', icon: 'i-heroicons-document-text' },
+  { to: '/contracts', label: '계약서', icon: 'i-heroicons-document-check' },
   { to: '/incomes', label: '정산/세금', icon: 'i-heroicons-banknotes' },
   { to: '/settings', label: '설정', icon: 'i-heroicons-cog-6-tooth' },
 ];

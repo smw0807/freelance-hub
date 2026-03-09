@@ -44,6 +44,20 @@ enum IncomeType {
   EXTRA
 }
 
+enum ContractStatus {
+  DRAFT
+  SENT
+  SIGNED
+  COMPLETED
+  CANCELLED
+}
+
+enum ContractType {
+  DEVELOPMENT
+  DESIGN
+  MAINTENANCE
+}
+
 model User {
   id               String    @id @default(cuid())
   email            String    @unique
@@ -58,9 +72,10 @@ model User {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
-  clients  Client[]
-  projects Project[]
-  incomes  Income[]
+  clients   Client[]
+  projects  Project[]
+  incomes   Income[]
+  contracts Contract[]
 }
 
 model Client {
@@ -109,6 +124,7 @@ model Project {
   quotes         Quote[]
   incomes        Income[]
   timeLogs       TimeLog[]
+  contracts      Contract[]
 }
 
 model ChecklistItem {
@@ -166,5 +182,29 @@ model TimeLog {
   durationMinutes Int?
   createdAt       DateTime  @default(now())
 
+  project Project @relation(fields: [projectId], references: [id])
+}
+
+model Contract {
+  id          String         @id @default(cuid())
+  userId      String
+  projectId   String
+  contractNo  String         @unique
+  type        ContractType   @default(DEVELOPMENT)
+  status      ContractStatus @default(DRAFT)
+  title       String
+  content     String
+  totalAmount Int            @default(0)
+  startDate   DateTime?
+  endDate     DateTime?
+  shareToken  String?        @unique
+  expiresAt   DateTime?
+  viewedAt    DateTime?
+  signedAt    DateTime?
+  signerName  String?
+  memo        String?
+  createdAt   DateTime       @default(now())
+
+  user    User    @relation(fields: [userId], references: [id])
   project Project @relation(fields: [projectId], references: [id])
 }

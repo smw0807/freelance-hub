@@ -12,6 +12,7 @@ import { ProjectsModule } from './projects/projects.module';
 import { QuotesModule } from './quotes/quotes.module';
 import { IncomesModule } from './incomes/incomes.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { ContractsModule } from './contracts/contracts.module';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { winstonConfig } from './logger/logger.config';
 
@@ -41,6 +42,7 @@ import { winstonConfig } from './logger/logger.config';
     QuotesModule,
     IncomesModule,
     DashboardModule,
+    ContractsModule,
   ],
   controllers: [AppController],
   providers: [

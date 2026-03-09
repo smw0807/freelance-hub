@@ -27,6 +27,9 @@ export type QuoteStatus =
 
 export type IncomeType = 'DEPOSIT' | 'BALANCE' | 'FULL' | 'EXTRA';
 
+export type ContractStatus = 'DRAFT' | 'SENT' | 'SIGNED' | 'COMPLETED' | 'CANCELLED';
+export type ContractType = 'DEVELOPMENT' | 'DESIGN' | 'MAINTENANCE';
+
 // ── Model Interfaces ─────────────────────────────────────────────────────────
 
 export interface User {
@@ -120,6 +123,28 @@ export interface Quote {
   shareToken?: string;
   expiresAt?: string;
   viewedAt?: string;
+  memo?: string;
+  createdAt: string;
+  project?: Pick<Project, 'id' | 'title'>;
+}
+
+export interface Contract {
+  id: string;
+  userId: string;
+  projectId: string;
+  contractNo: string;
+  type: ContractType;
+  status: ContractStatus;
+  title: string;
+  content: string;
+  totalAmount: number;
+  startDate?: string;
+  endDate?: string;
+  shareToken?: string;
+  expiresAt?: string;
+  viewedAt?: string;
+  signedAt?: string;
+  signerName?: string;
   memo?: string;
   createdAt: string;
   project?: Pick<Project, 'id' | 'title'>;
