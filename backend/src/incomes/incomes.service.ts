@@ -169,7 +169,16 @@ export class IncomesService {
           lte: new Date(y, 11, 31, 23, 59, 59),
         },
       },
-      include: { project: { select: { id: true, title: true, platform: true } } },
+      include: {
+        project: {
+          select: {
+            id: true,
+            title: true,
+            platform: true,
+            client: { select: { id: true, name: true } },
+          },
+        },
+      },
       orderBy: { paidAt: 'asc' },
     });
 
@@ -187,12 +196,80 @@ export class IncomesService {
       };
     });
 
+    // Client breakdown
+    const clientMap = new Map<
+      string,
+      { clientName: string; total: number; projectIds: Set<string> }
+    >();
+    for (const inc of incomes) {
+      const client = (inc as any).project?.client;
+      const clientKey = client?.id ?? '__none__';
+      const clientName = client?.name ?? '(클라이언트 없음)';
+      if (!clientMap.has(clientKey)) {
+        clientMap.set(clientKey, { clientName, total: 0, projectIds: new Set() });
+      }
+      const entry = clientMap.get(clientKey)!;
+      entry.total += inc.netAmount;
+      entry.projectIds.add(inc.projectId);
+    }
+    const clientBreakdown = Array.from(clientMap.values())
+      .map(({ clientName, total, projectIds }) => ({
+        clientName,
+        total,
+        projectCount: projectIds.size,
+      }))
+      .sort((a, b) => b.total - a.total);
+
+    // Project hourly rates
+    const projectIds = [...new Set(incomes.map((i) => i.projectId))];
+    const projectsWithTimeLogs = projectIds.length > 0
+      ? await this.prisma.project.findMany({
+          where: { id: { in: projectIds } },
+          select: {
+            id: true,
+            title: true,
+            timeLogs: { select: { durationMinutes: true } },
+          },
+        })
+      : [];
+
+    const projectIncomeMap = new Map<string, number>();
+    for (const inc of incomes) {
+      projectIncomeMap.set(
+        inc.projectId,
+        (projectIncomeMap.get(inc.projectId) ?? 0) + inc.netAmount,
+      );
+    }
+
+    const projectHourlyRates = projectsWithTimeLogs
+      .map((p) => {
+        const totalNet = projectIncomeMap.get(p.id) ?? 0;
+        const totalMinutes = p.timeLogs.reduce(
+          (s, t) => s + (t.durationMinutes ?? 0),
+          0,
+        );
+        const hourlyRate =
+          totalMinutes > 0
+            ? Math.round(totalNet / (totalMinutes / 60))
+            : null;
+        return { title: p.title, totalNet, totalMinutes, hourlyRate };
+      })
+      .sort((a, b) => b.totalNet - a.totalNet);
+
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: { name: true, email: true },
     });
 
-    return { user, year: y, taxReport, monthlyBreakdown, incomes };
+    return {
+      user,
+      year: y,
+      taxReport,
+      monthlyBreakdown,
+      incomes,
+      clientBreakdown,
+      projectHourlyRates,
+    };
   }
 
   async getTaxReport(userId: string, year?: number) {

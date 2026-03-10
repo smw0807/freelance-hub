@@ -23,8 +23,19 @@ export function generateIncomeReportHtml(data: {
     netAmount: number;
     memo?: string | null;
   }>;
+  clientBreakdown: Array<{
+    clientName: string;
+    total: number;
+    projectCount: number;
+  }>;
+  projectHourlyRates: Array<{
+    title: string;
+    totalNet: number;
+    totalMinutes: number;
+    hourlyRate: number | null;
+  }>;
 }): string {
-  const { user, year, taxReport, monthlyBreakdown, incomes } = data;
+  const { user, year, taxReport, monthlyBreakdown, incomes, clientBreakdown, projectHourlyRates } = data;
   const fmt = (n: number) => `₩${n.toLocaleString('ko-KR')}`;
   const today = new Date().toLocaleDateString('ko-KR');
 
@@ -133,6 +144,56 @@ export function generateIncomeReportHtml(data: {
     </thead>
     <tbody>
       ${incomeRows || '<tr><td colspan="6" style="text-align:center;color:#999">수입 내역이 없습니다.</td></tr>'}
+    </tbody>
+  </table>
+
+  <h2>클라이언트별 수입</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>클라이언트</th>
+        <th class="num">프로젝트 수</th>
+        <th class="num">총 수입</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${clientBreakdown.length
+        ? clientBreakdown.map((c) => `
+      <tr>
+        <td>${c.clientName}</td>
+        <td class="num">${c.projectCount}</td>
+        <td class="num">${fmt(c.total)}</td>
+      </tr>`).join('')
+        : '<tr><td colspan="3" style="text-align:center;color:#999">내역이 없습니다.</td></tr>'}
+    </tbody>
+  </table>
+
+  <h2>프로젝트별 시간당 단가</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>프로젝트</th>
+        <th class="num">총 수입</th>
+        <th class="num">작업 시간</th>
+        <th class="num">시간당 단가</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${projectHourlyRates.length
+        ? projectHourlyRates.map((p) => {
+            const hours = p.totalMinutes > 0
+              ? `${Math.floor(p.totalMinutes / 60)}h ${p.totalMinutes % 60}m`
+              : '-';
+            const rate = p.hourlyRate !== null ? fmt(p.hourlyRate) : '-';
+            return `
+      <tr>
+        <td>${p.title}</td>
+        <td class="num">${fmt(p.totalNet)}</td>
+        <td class="num">${hours}</td>
+        <td class="num">${rate}</td>
+      </tr>`;
+          }).join('')
+        : '<tr><td colspan="4" style="text-align:center;color:#999">내역이 없습니다.</td></tr>'}
     </tbody>
   </table>
 </body>
