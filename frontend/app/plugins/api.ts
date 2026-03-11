@@ -2,6 +2,12 @@ export default defineNuxtPlugin(() => {
   const config = useRuntimeConfig();
   const authStore = useAuthStore();
 
+  // Singleton refresh promise — prevents concurrent refresh calls with stale tokens
+  let refreshPromise: Promise<{
+    accessToken: string;
+    refreshToken: string;
+  }> | null = null;
+
   const $api = async <T = any>(
     path: string,
     options: Parameters<typeof $fetch>[1] = {},
@@ -20,13 +26,19 @@ export default defineNuxtPlugin(() => {
     } catch (err: any) {
       if (err?.response?.status === 401 && authStore.refreshToken) {
         try {
-          const tokens = await $fetch<{
-            accessToken: string;
-            refreshToken: string;
-          }>(`${apiBase}/auth/refresh`, {
-            method: 'POST',
-            body: { refreshToken: authStore.refreshToken },
-          });
+          // Reuse an in-flight refresh to avoid race conditions
+          if (!refreshPromise) {
+            refreshPromise = $fetch<{
+              accessToken: string;
+              refreshToken: string;
+            }>(`${apiBase}/auth/refresh`, {
+              method: 'POST',
+              body: { refreshToken: authStore.refreshToken },
+            }).finally(() => {
+              refreshPromise = null;
+            });
+          }
+          const tokens = await refreshPromise;
           authStore.setTokens(tokens.accessToken, tokens.refreshToken);
           headers['Authorization'] = `Bearer ${tokens.accessToken}`;
           return await $fetch<T>(`${apiBase}${path}`, {

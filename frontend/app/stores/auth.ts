@@ -40,9 +40,13 @@ export const useAuthStore = defineStore('auth', () => {
   async function fetchMe() {
     try {
       const { $api } = useNuxtApp();
-      user.value = await ($api as any)<User>('/auth/me');
-    } catch {
-      clearAuth();
+      user.value = await $api<User>('/auth/me');
+    } catch (err: any) {
+      // Only clear auth on definitive auth failure, not on network/server errors
+      const status = err?.response?.status ?? err?.status;
+      if (status === 401) {
+        clearAuth();
+      }
     }
   }
 
@@ -50,7 +54,7 @@ export const useAuthStore = defineStore('auth', () => {
     try {
       const { $api } = useNuxtApp();
       await ($api as any)('/auth/logout', { method: 'POST' });
-    } catch {}
+    } catch { }
     clearAuth();
     await navigateTo('/auth/login');
   }
