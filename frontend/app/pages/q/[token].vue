@@ -88,7 +88,23 @@
         </template>
       </UCard>
 
-      <UAlert v-if="error" color="error" :title="error" />
+      <UCard v-else-if="errorStatus === 403" class="text-center py-8">
+        <div class="space-y-2">
+          <p class="text-2xl">⏰</p>
+          <p class="font-semibold text-lg">견적서가 만료되었습니다</p>
+          <p class="text-gray-500 text-sm">공유 링크의 유효기간이 지났습니다. 담당자에게 문의해 주세요.</p>
+        </div>
+      </UCard>
+
+      <UCard v-else-if="errorStatus === 404" class="text-center py-8">
+        <div class="space-y-2">
+          <p class="text-2xl">🔍</p>
+          <p class="font-semibold text-lg">견적서를 찾을 수 없습니다</p>
+          <p class="text-gray-500 text-sm">링크가 올바른지 확인해 주세요.</p>
+        </div>
+      </UCard>
+
+      <UAlert v-else-if="error" color="error" :title="error" />
     </div>
   </div>
 </template>
@@ -105,6 +121,7 @@ const token = route.params.token as string;
 const quote = ref<Quote | null>(null);
 const loading = ref<string | null>(null);
 const error = ref('');
+const errorStatus = ref<number | null>(null);
 
 onMounted(async () => {
   try {
@@ -112,9 +129,9 @@ onMounted(async () => {
       `${config.public.apiBase}/quotes/public/${token}`,
     );
   } catch (err: unknown) {
-    error.value =
-      (err as { data?: { message?: string } })?.data?.message ||
-      '견적서를 불러올 수 없습니다.';
+    const e = err as { status?: number; data?: { message?: string } };
+    errorStatus.value = e?.status ?? null;
+    error.value = e?.data?.message || '견적서를 불러올 수 없습니다.';
   }
 });
 

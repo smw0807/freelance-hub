@@ -14,7 +14,7 @@ export class ClientsService {
     const { search, isBlacklisted, page = 1, limit = 20 } = query;
     const skip = (page - 1) * limit;
 
-    const where: any = { userId, deletedAt: null };
+    const where: any = { userId };
     if (search) {
       where.OR = [
         { name: { contains: search, mode: 'insensitive' } },
@@ -39,7 +39,7 @@ export class ClientsService {
 
   async findOne(userId: string, id: string) {
     const client = await this.prisma.client.findFirst({
-      where: { id, userId, deletedAt: null },
+      where: { id, userId },
     });
     if (!client) {
       this.logger.warn(`Client not found: id=${id} userId=${userId}`);

@@ -8,9 +8,10 @@ export default defineNuxtRouteMiddleware((to) => {
     '/auth/register',
     '/auth/kakao/callback',
   ];
-  const isPublicQuote = to.path.startsWith('/q/');
+  const isPublicRoute =
+    to.path.startsWith('/q/') || to.path.startsWith('/c/');
 
-  if (isPublicQuote || publicRoutes.includes(to.path)) {
+  if (isPublicRoute || publicRoutes.includes(to.path)) {
     return;
   }
 
