@@ -135,7 +135,16 @@ export class AuthService {
       throw new UnauthorizedException('Refresh token not found');
 
     const valid = await bcrypt.compare(refreshToken, user.refreshTokenHash);
-    if (!valid) throw new UnauthorizedException('Invalid refresh token');
+    if (!valid) {
+      // Reuse detection: hash mismatch means the token was already rotated.
+      // Revoke all sessions immediately to limit attacker's window.
+      this.logger.warn(`Refresh token reuse detected for userId=${userId} — revoking all sessions`);
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: { refreshTokenHash: null },
+      });
+      throw new UnauthorizedException('Invalid refresh token');
+    }
 
     return this.issueTokens(user.id, user.email);
   }
