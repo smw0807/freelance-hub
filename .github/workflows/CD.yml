@@ -22,6 +22,7 @@ jobs:
         run: |
           docker stop freelance-hub-backend || true
           docker rm freelance-hub-backend || true
+          docker rmi freelance-hub-backend || true
 
       - name: Pull latest image
         run: docker pull smw0807/freelance-hub-backend:1.0.0
