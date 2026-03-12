@@ -124,6 +124,7 @@ definePageMeta({ middleware: 'auth' });
 const route = useRoute();
 const clientStore = useClientStore();
 const { client, clientProjects, clientStats } = storeToRefs(clientStore);
+useSeoMeta({ title: () => client.value?.name ?? '클라이언트 상세' });
 
 const showEdit = ref(false);
 

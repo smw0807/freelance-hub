@@ -69,6 +69,7 @@
 
 <script setup lang="ts">
 definePageMeta({ middleware: 'auth' });
+useSeoMeta({ title: '프로젝트' });
 
 const projectStore = useProjectStore();
 const { projects, loading } = storeToRefs(projectStore);

@@ -99,6 +99,7 @@ import {
 } from '~/constants/contract-templates';
 
 definePageMeta({ middleware: 'auth' });
+useSeoMeta({ title: '계약서 작성' });
 
 const { $api } = useNuxtApp();
 const contractStore = useContractStore();

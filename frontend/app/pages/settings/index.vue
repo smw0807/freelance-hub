@@ -144,6 +144,7 @@
 
 <script setup lang="ts">
 definePageMeta({ middleware: 'auth' });
+useSeoMeta({ title: '설정' });
 
 const { $api } = useNuxtApp();
 const authStore = useAuthStore();

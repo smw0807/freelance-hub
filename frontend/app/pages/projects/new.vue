@@ -93,6 +93,7 @@ import { PLATFORM_ITEMS as platformItems } from '~/constants/platform';
 import { STATUS_ITEMS_CREATE as statusItems } from '~/constants/project';
 
 definePageMeta({ middleware: 'auth' });
+useSeoMeta({ title: '프로젝트 추가' });
 
 const { $api } = useNuxtApp();
 const route = useRoute();

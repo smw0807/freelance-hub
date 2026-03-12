@@ -55,6 +55,7 @@
 import { z } from 'zod';
 
 definePageMeta({ layout: 'auth' });
+useSeoMeta({ title: '로그인' });
 
 const { $api } = useNuxtApp();
 const authStore = useAuthStore();

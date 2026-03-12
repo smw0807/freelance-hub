@@ -147,6 +147,7 @@ import {
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 definePageMeta({ middleware: 'auth' });
+useSeoMeta({ title: '대시보드' });
 
 const dashboardStore = useDashboardStore();
 const { dashboard } = storeToRefs(dashboardStore);

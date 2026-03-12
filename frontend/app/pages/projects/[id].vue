@@ -215,6 +215,7 @@ definePageMeta({ middleware: 'auth' });
 const route = useRoute();
 const projectStore = useProjectStore();
 const { project } = storeToRefs(projectStore);
+useSeoMeta({ title: () => project.value?.title ?? '프로젝트 상세' });
 
 const newCheckItem = ref('');
 const isTracking = ref(false);

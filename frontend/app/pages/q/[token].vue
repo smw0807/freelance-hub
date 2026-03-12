@@ -119,6 +119,11 @@ const route = useRoute();
 const token = route.params.token as string;
 
 const quote = ref<Quote | null>(null);
+useSeoMeta({
+  title: () => quote.value ? `견적서 ${quote.value.quoteNo}` : '견적서',
+  ogTitle: () => quote.value ? `견적서 ${quote.value.quoteNo} - ${quote.value.project?.title ?? ''}` : 'FreelanceHub 견적서',
+  ogDescription: () => quote.value ? `합계 ₩${quote.value.totalAmount.toLocaleString()}` : '',
+});
 const loading = ref<string | null>(null);
 const error = ref('');
 const errorStatus = ref<number | null>(null);

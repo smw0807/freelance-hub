@@ -81,6 +81,7 @@
 import { PLATFORM_ITEMS as platformItems } from '~/constants/platform';
 
 definePageMeta({ middleware: 'auth' });
+useSeoMeta({ title: '클라이언트 추가' });
 
 const clientStore = useClientStore();
 

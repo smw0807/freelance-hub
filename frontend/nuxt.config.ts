@@ -6,6 +6,8 @@ export default defineNuxtConfig({
 
   app: {
     head: {
+      htmlAttrs: { lang: 'ko' },
+      titleTemplate: '%s | FreelanceHub',
       link: [
         { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
         { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
@@ -13,7 +15,13 @@ export default defineNuxtConfig({
         { rel: 'apple-touch-icon', sizes: '180x180', href: '/apple-touch-icon.png' },
       ],
       meta: [
+        { charset: 'utf-8' },
+        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
         { name: 'theme-color', content: '#6366f1' },
+        { name: 'description', content: '한국 프리랜서를 위한 올인원 업무 관리 툴' },
+        { property: 'og:site_name', content: 'FreelanceHub' },
+        { property: 'og:type', content: 'website' },
+        { property: 'og:description', content: '한국 프리랜서를 위한 올인원 업무 관리 툴' },
       ],
     },
   },

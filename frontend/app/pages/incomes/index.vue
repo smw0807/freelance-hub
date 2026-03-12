@@ -184,6 +184,7 @@ import type { Project, PaginatedResponse } from '~/types/models';
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Tooltip, Legend);
 
 definePageMeta({ middleware: 'auth' });
+useSeoMeta({ title: '정산 / 세금' });
 
 const { $api } = useNuxtApp();
 const incomeStore = useIncomeStore();

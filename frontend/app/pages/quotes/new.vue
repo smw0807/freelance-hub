@@ -127,6 +127,7 @@
 import type { Project, PaginatedResponse } from '~/types/models';
 
 definePageMeta({ middleware: 'auth' });
+useSeoMeta({ title: '견적서 작성' });
 
 const { $api } = useNuxtApp();
 const quoteStore = useQuoteStore();

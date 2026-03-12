@@ -47,6 +47,7 @@
 import { contractStatusLabel, contractStatusColor, contractTypeLabel } from '~/constants/contract';
 
 definePageMeta({ middleware: 'auth' });
+useSeoMeta({ title: '계약서' });
 
 const contractStore = useContractStore();
 const { contracts, loading } = storeToRefs(contractStore);

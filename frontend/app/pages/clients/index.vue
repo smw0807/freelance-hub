@@ -98,6 +98,7 @@
 import { useDebounceFn } from '@vueuse/core';
 
 definePageMeta({ middleware: 'auth' });
+useSeoMeta({ title: '클라이언트' });
 
 const clientStore = useClientStore();
 const { clients, total, loading } = storeToRefs(clientStore);

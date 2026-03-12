@@ -12,6 +12,7 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: false });
+useSeoMeta({ title: '로그인 중' });
 
 const route = useRoute();
 const authStore = useAuthStore();

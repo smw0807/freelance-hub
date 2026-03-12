@@ -114,6 +114,11 @@ const route = useRoute();
 const token = route.params.token as string;
 
 const contract = ref<Contract | null>(null);
+useSeoMeta({
+  title: () => contract.value ? `계약서 ${contract.value.contractNo}` : '계약서',
+  ogTitle: () => contract.value ? `계약서 ${contract.value.contractNo} - ${contract.value.project?.title ?? ''}` : 'FreelanceHub 계약서',
+  ogDescription: () => contract.value ? `계약 금액 ₩${contract.value.totalAmount.toLocaleString()}` : '',
+});
 const error = ref('');
 const errorStatus = ref<number | null>(null);
 const signerName = ref('');

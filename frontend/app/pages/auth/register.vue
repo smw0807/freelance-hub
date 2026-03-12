@@ -52,6 +52,7 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: 'auth' });
+useSeoMeta({ title: '회원가입' });
 
 const { $api } = useNuxtApp();
 const authStore = useAuthStore();

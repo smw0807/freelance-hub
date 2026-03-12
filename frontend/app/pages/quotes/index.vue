@@ -53,6 +53,7 @@
 
 <script setup lang="ts">
 definePageMeta({ middleware: 'auth' });
+useSeoMeta({ title: '견적서' });
 
 const quoteStore = useQuoteStore();
 const { quotes, loading } = storeToRefs(quoteStore);

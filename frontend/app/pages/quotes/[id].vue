@@ -129,6 +129,7 @@ const route = useRoute();
 const config = useRuntimeConfig();
 const quoteStore = useQuoteStore();
 const { quote, shareLoading } = storeToRefs(quoteStore);
+useSeoMeta({ title: () => quote.value?.quoteNo ?? '견적서 상세' });
 
 const shareModalOpen = ref(false);
 const shareForm = reactive({ expiresAt: '' });

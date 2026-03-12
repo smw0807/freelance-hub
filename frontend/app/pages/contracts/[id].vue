@@ -122,6 +122,7 @@ definePageMeta({ middleware: 'auth' });
 const route = useRoute();
 const contractStore = useContractStore();
 const { contract, shareLoading } = storeToRefs(contractStore);
+useSeoMeta({ title: () => contract.value?.contractNo ?? '계약서 상세' });
 
 const shareModalOpen = ref(false);
 const shareForm = reactive({ expiresAt: '' });
