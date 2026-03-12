@@ -156,28 +156,33 @@ export class AuthService {
   async logout(userId: string) {
     await this.prisma.user.update({
       where: { id: userId },
-      data: { refreshTokenHash: null },
+      data: {
+        refreshTokenHash: null,
+        tokenVersion: { increment: 1 }, // Invalidate all existing access tokens
+      },
     });
   }
 
   private async issueTokens(userId: string, email: string) {
-    const payload = { sub: userId, email };
+    // 1. Generate refresh token
+    const refreshToken = this.jwtService.sign(
+      { sub: userId, email },
+      { secret: this.configService.get('JWT_REFRESH_SECRET'), expiresIn: '7d' },
+    );
 
-    const accessToken = this.jwtService.sign(payload, {
-      secret: this.configService.get('JWT_SECRET'),
-      expiresIn: '1h',
-    });
-
-    const refreshToken = this.jwtService.sign(payload, {
-      secret: this.configService.get('JWT_REFRESH_SECRET'),
-      expiresIn: '7d',
-    });
-
+    // 2. Persist new refresh token hash, read back tokenVersion in one round-trip
     const refreshTokenHash = await bcrypt.hash(refreshToken, 10);
-    await this.prisma.user.update({
+    const { tokenVersion } = await this.prisma.user.update({
       where: { id: userId },
       data: { refreshTokenHash },
+      select: { tokenVersion: true },
     });
+
+    // 3. Embed tokenVersion in access token so logout invalidates it immediately
+    const accessToken = this.jwtService.sign(
+      { sub: userId, email, tokenVersion },
+      { secret: this.configService.get('JWT_SECRET'), expiresIn: '1h' },
+    );
 
     return { accessToken, refreshToken };
   }

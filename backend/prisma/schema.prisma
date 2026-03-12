@@ -69,6 +69,7 @@ model User {
   kakaoOauthId     String?   @unique
   password         String?
   refreshTokenHash String?
+  tokenVersion     Int       @default(0)
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
