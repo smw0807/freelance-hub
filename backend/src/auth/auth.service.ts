@@ -11,6 +11,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -151,6 +152,22 @@ export class AuthService {
 
   async updateProfile(userId: string, dto: UpdateProfileDto) {
     return this.prisma.user.update({ where: { id: userId }, data: dto });
+  }
+
+  async changePassword(userId: string, dto: ChangePasswordDto) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user?.password) {
+      throw new BadRequestException('소셜 로그인 계정은 비밀번호를 변경할 수 없습니다.');
+    }
+
+    const valid = await bcrypt.compare(dto.currentPassword, user.password);
+    if (!valid) {
+      throw new BadRequestException('현재 비밀번호가 올바르지 않습니다.');
+    }
+
+    const password = await bcrypt.hash(dto.newPassword, 10);
+    await this.prisma.user.update({ where: { id: userId }, data: { password } });
+    this.logger.log(`Password changed for userId=${userId}`);
   }
 
   async logout(userId: string) {

@@ -40,6 +40,7 @@ export interface User {
   plan: UserPlan;
   planExpiredAt?: string;
   hourlyRate?: number;
+  hasPassword?: boolean;
   createdAt: string;
   updatedAt: string;
 }
