@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { Platform, PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
+import * as nodemailer from 'nodemailer';
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
@@ -687,6 +688,115 @@ async function main() {
 
   await prisma.income.createMany({ data: incomes });
   console.log('✅ 수입 9건 생성');
+
+  // ── 알림 테스트용 동적 날짜 프로젝트 ──────────────────────────────────────
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const addDays = (d: Date, days: number) => {
+    const r = new Date(d);
+    r.setDate(r.getDate() + days);
+    return r;
+  };
+
+  await prisma.project.deleteMany({
+    where: { userId: user.id, title: { startsWith: '[알림테스트]' } },
+  });
+
+  await Promise.all([
+    prisma.project.create({
+      data: {
+        userId: user.id,
+        title: '[알림테스트] D-1 마감 프로젝트',
+        status: 'IN_PROGRESS',
+        platform: 'DIRECT',
+        contractAmount: 1000000,
+        depositAmount: 500000,
+        balanceAmount: 500000,
+        startedAt: addDays(today, -10),
+        deadlineAt: addDays(today, 1),
+      },
+    }),
+    prisma.project.create({
+      data: {
+        userId: user.id,
+        title: '[알림테스트] D-3 마감 프로젝트',
+        status: 'IN_PROGRESS',
+        platform: 'DIRECT',
+        contractAmount: 1000000,
+        depositAmount: 500000,
+        balanceAmount: 500000,
+        startedAt: addDays(today, -10),
+        deadlineAt: addDays(today, 3),
+      },
+    }),
+    prisma.project.create({
+      data: {
+        userId: user.id,
+        title: '[알림테스트] D-7 마감 프로젝트',
+        status: 'IN_PROGRESS',
+        platform: 'DIRECT',
+        contractAmount: 1000000,
+        depositAmount: 500000,
+        balanceAmount: 500000,
+        startedAt: addDays(today, -14),
+        deadlineAt: addDays(today, 7),
+      },
+    }),
+    prisma.project.create({
+      data: {
+        userId: user.id,
+        title: '[알림테스트] 미수금 독촉 프로젝트',
+        status: 'DELIVERED',
+        platform: 'DIRECT',
+        contractAmount: 2000000,
+        depositAmount: 1000000,
+        depositPaidAt: addDays(today, -20),
+        balanceAmount: 1000000,
+        balancePaidAt: null,
+        startedAt: addDays(today, -30),
+        deliveredAt: addDays(today, -7),
+      },
+    }),
+  ]);
+  console.log('✅ 알림 테스트용 프로젝트 4건 생성 (D-1/D-3/D-7/미수금)');
+
+  // ── 테스트 이메일 직접 발송 ──────────────────────────────────────────────
+  const smtpUser = process.env.SMTP_USER;
+  if (smtpUser) {
+    console.log('\n📧 테스트 이메일 발송 중...');
+    const transporter = nodemailer.createTransport({
+      host: process.env.SMTP_HOST ?? 'smtp.gmail.com',
+      port: Number(process.env.SMTP_PORT ?? 587),
+      secure: false,
+      auth: { user: smtpUser, pass: process.env.SMTP_PASS },
+    });
+
+    const frontendUrl = process.env.FRONTEND_URL ?? 'http://localhost:3000';
+    const html = `
+<h2>FreelanceHub 알림 시스템 테스트 이메일</h2>
+<p>시드 데이터 생성이 완료되었습니다. 아래 알림 테스트 프로젝트가 생성되었습니다:</p>
+<ul>
+  <li>✅ <strong>[알림테스트] D-1 마감 프로젝트</strong> — 내일(${addDays(today, 1).toLocaleDateString('ko-KR')}) 마감</li>
+  <li>✅ <strong>[알림테스트] D-3 마감 프로젝트</strong> — ${addDays(today, 3).toLocaleDateString('ko-KR')} 마감</li>
+  <li>✅ <strong>[알림테스트] D-7 마감 프로젝트</strong> — ${addDays(today, 7).toLocaleDateString('ko-KR')} 마감</li>
+  <li>✅ <strong>[알림테스트] 미수금 독촉 프로젝트</strong> — 7일 전 납품, 잔금 미수령</li>
+</ul>
+<p>스케줄러(매일 09:00 KST)가 실행되면 각 알림 이메일이 자동 발송됩니다.</p>
+<p><a href="${frontendUrl}">FreelanceHub 바로가기 →</a></p>
+<hr>
+<p style="color:#888;font-size:12px;">이 메일은 seed 스크립트 실행 시 자동 발송되는 테스트 이메일입니다.</p>`;
+
+    await transporter.sendMail({
+      from: `FreelanceHub <${smtpUser}>`,
+      to: smtpUser,
+      subject: '[FreelanceHub] 알림 시스템 테스트 이메일',
+      html,
+    });
+    console.log(`✅ 테스트 이메일 발송 완료 → ${smtpUser}`);
+  } else {
+    console.log('⚠️  SMTP_USER 미설정 — 테스트 이메일 스킵 (.env에 SMTP_USER 추가 필요)');
+  }
 
   console.log('\n🎉 시드 완료!');
   console.log('──────────────────────────────');
