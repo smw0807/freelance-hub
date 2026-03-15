@@ -9,18 +9,26 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
   console.log('🌱 시드 데이터 생성 시작...');
 
+  const testEmail = 'smw08072@gmail.com';
+
   // ── 기존 사용자 조회 ────────────────────────────────────────────────────
-  const user = await prisma.user.findUnique({ where: { email: 'test1@gmail.com' } });
+  const user = await prisma.user.findUnique({ where: { email: testEmail } });
   if (!user) {
-    throw new Error('test1@gmail.com 사용자를 찾을 수 없습니다. 먼저 회원가입 후 실행하세요.');
+    throw new Error(`${testEmail} 사용자를 찾을 수 없습니다. 먼저 회원가입 후 실행하세요.`);
   }
   console.log(`✅ 사용자 확인: ${user.email}`);
 
   // ── 기존 시드 데이터 초기화 (해당 유저 데이터만) ─────────────────────────
+  // project IDs를 먼저 조회해 명시적으로 삭제 (nested relation filter 신뢰성 문제 방지)
+  const existingProjectIds = await prisma.project
+    .findMany({ where: { userId: user.id }, select: { id: true } })
+    .then((rows) => rows.map((r) => r.id));
+
+  await prisma.notification.deleteMany({ where: { userId: user.id } });
   await prisma.income.deleteMany({ where: { userId: user.id } });
-  await prisma.timeLog.deleteMany({ where: { project: { userId: user.id } } });
-  await prisma.checklistItem.deleteMany({ where: { project: { userId: user.id } } });
-  await prisma.quote.deleteMany({ where: { project: { userId: user.id } } });
+  await prisma.timeLog.deleteMany({ where: { projectId: { in: existingProjectIds } } });
+  await prisma.checklistItem.deleteMany({ where: { projectId: { in: existingProjectIds } } });
+  await prisma.quote.deleteMany({ where: { projectId: { in: existingProjectIds } } });
   await prisma.contract.deleteMany({ where: { userId: user.id } });
   await prisma.project.deleteMany({ where: { userId: user.id } });
   await prisma.client.deleteMany({ where: { userId: user.id } });
