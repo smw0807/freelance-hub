@@ -67,4 +67,7 @@ export class PrismaService implements OnModuleInit {
   get contract() {
     return this._db.contract;
   }
+  get notification() {
+    return this._db.notification;
+  }
 }

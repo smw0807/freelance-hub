@@ -11,6 +11,9 @@ import { ShareQuoteDto } from './dto/share-quote.dto';
 import { PdfService } from './pdf/pdf.service';
 import { generateQuoteHtml } from './pdf/quote-template';
 import { randomBytes } from 'crypto';
+import { NotificationsService } from '../notifications/notifications.service';
+import { EmailService } from '../notifications/email.service';
+import { KakaoAlimtalkService } from '../notifications/kakao.service';
 
 @Injectable()
 export class QuotesService {
@@ -19,6 +22,9 @@ export class QuotesService {
   constructor(
     private prisma: PrismaService,
     private pdfService: PdfService,
+    private notifService: NotificationsService,
+    private emailService: EmailService,
+    private kakaoService: KakaoAlimtalkService,
   ) {}
 
   private async generateQuoteNo(userId: string): Promise<string> {
@@ -92,7 +98,12 @@ export class QuotesService {
   async getPublicByToken(token: string) {
     const quote = await this.prisma.quote.findUnique({
       where: { shareToken: token },
-      include: { project: { select: { title: true, client: true } } },
+      include: {
+        project: {
+          select: { title: true, client: true, userId: true },
+          include: { user: true },
+        },
+      },
     });
     if (!quote) {
       this.logger.warn(`Public quote not found: token=${token.slice(0, 8)}...`);
@@ -106,27 +117,73 @@ export class QuotesService {
       });
       throw new ForbiddenException('견적서가 만료되었습니다.');
     }
+    const isFirstView = !quote.viewedAt;
     await this.prisma.quote.update({
       where: { id: quote.id },
       data: { viewedAt: new Date() },
     });
+
+    if (isFirstView) {
+      const owner = (quote.project as any).user;
+      const userId = (quote.project as any).userId;
+      await this.notifService.create(
+        userId,
+        'QUOTE_VIEWED',
+        '견적서 열람',
+        `"${quote.quoteNo}" 견적서를 클라이언트가 열람했습니다.`,
+        `/quotes/${quote.id}`,
+      );
+      await this.emailService.sendQuoteViewed(owner.email, owner.name, quote.quoteNo, quote.id);
+      if (owner.phone) {
+        await this.kakaoService.sendQuoteViewed(owner.phone, quote.quoteNo);
+      }
+    }
+
     return quote;
   }
 
   async acceptPublic(token: string) {
     const quote = await this.getPublicByToken(token);
-    return this.prisma.quote.update({
+    const updated = await this.prisma.quote.update({
       where: { id: quote.id },
       data: { status: 'ACCEPTED' },
     });
+    const owner = (quote.project as any).user;
+    const userId = (quote.project as any).userId;
+    await this.notifService.create(
+      userId,
+      'QUOTE_ACCEPTED',
+      '견적서 수락',
+      `"${quote.quoteNo}" 견적서가 수락되었습니다.`,
+      `/quotes/${quote.id}`,
+    );
+    await this.emailService.sendQuoteResponse(owner.email, owner.name, quote.quoteNo, quote.id, true);
+    if (owner.phone) {
+      await this.kakaoService.sendQuoteResponse(owner.phone, quote.quoteNo, true);
+    }
+    return updated;
   }
 
   async rejectPublic(token: string) {
     const quote = await this.getPublicByToken(token);
-    return this.prisma.quote.update({
+    const updated = await this.prisma.quote.update({
       where: { id: quote.id },
       data: { status: 'REJECTED' },
     });
+    const owner = (quote.project as any).user;
+    const userId = (quote.project as any).userId;
+    await this.notifService.create(
+      userId,
+      'QUOTE_REJECTED',
+      '견적서 거절',
+      `"${quote.quoteNo}" 견적서가 거절되었습니다.`,
+      `/quotes/${quote.id}`,
+    );
+    await this.emailService.sendQuoteResponse(owner.email, owner.name, quote.quoteNo, quote.id, false);
+    if (owner.phone) {
+      await this.kakaoService.sendQuoteResponse(owner.phone, quote.quoteNo, false);
+    }
+    return updated;
   }
 
   async generatePdf(userId: string, id: string): Promise<Buffer> {

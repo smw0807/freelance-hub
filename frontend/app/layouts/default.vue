@@ -47,6 +47,9 @@
               {{ authStore.user?.email }}
             </p>
           </div>
+          <div class="relative">
+            <AppNotificationBell />
+          </div>
           <UButton
             variant="ghost"
             size="xs"
@@ -66,7 +69,16 @@
 
 <script setup lang="ts">
 const authStore = useAuthStore();
+const notificationStore = useNotificationStore();
 const route = useRoute();
+
+onMounted(() => {
+  notificationStore.startPolling();
+});
+
+onUnmounted(() => {
+  notificationStore.stopPolling();
+});
 
 const navItems = [
   { to: '/', label: '대시보드', icon: 'i-heroicons-home' },

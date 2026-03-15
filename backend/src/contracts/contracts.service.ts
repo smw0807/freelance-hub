@@ -11,6 +11,9 @@ import { ShareContractDto } from './dto/share-contract.dto';
 import { PdfService } from '../quotes/pdf/pdf.service';
 import { generateContractHtml } from './pdf/contract-template';
 import { randomBytes } from 'crypto';
+import { NotificationsService } from '../notifications/notifications.service';
+import { EmailService } from '../notifications/email.service';
+import { KakaoAlimtalkService } from '../notifications/kakao.service';
 
 @Injectable()
 export class ContractsService {
@@ -19,6 +22,9 @@ export class ContractsService {
   constructor(
     private prisma: PrismaService,
     private pdfService: PdfService,
+    private notifService: NotificationsService,
+    private emailService: EmailService,
+    private kakaoService: KakaoAlimtalkService,
   ) {}
 
   private async generateContractNo(userId: string): Promise<string> {
@@ -104,7 +110,10 @@ export class ContractsService {
   async getPublicByToken(token: string) {
     const contract = await this.prisma.contract.findUnique({
       where: { shareToken: token },
-      include: { project: { select: { title: true, client: true } } },
+      include: {
+        project: { select: { title: true, client: true } },
+        user: true,
+      },
     });
     if (!contract) {
       this.logger.warn(`Public contract not found: token=${token.slice(0, 8)}...`);
@@ -126,10 +135,29 @@ export class ContractsService {
     if (contract.status === 'SIGNED' || contract.status === 'COMPLETED') {
       throw new ForbiddenException('이미 서명된 계약서입니다.');
     }
-    return this.prisma.contract.update({
+    const updated = await this.prisma.contract.update({
       where: { id: contract.id },
       data: { signerName, signedAt: new Date(), status: 'SIGNED' },
     });
+    const owner = (contract as any).user;
+    await this.notifService.create(
+      contract.userId,
+      'CONTRACT_SIGNED',
+      '계약서 서명 완료',
+      `"${contract.contractNo}" 계약서에 ${signerName}님이 서명했습니다.`,
+      `/contracts/${contract.id}`,
+    );
+    await this.emailService.sendContractSigned(
+      owner.email,
+      owner.name,
+      contract.contractNo,
+      contract.id,
+      signerName,
+    );
+    if (owner.phone) {
+      await this.kakaoService.sendContractSigned(owner.phone, contract.contractNo, signerName);
+    }
+    return updated;
   }
 
   async generatePdf(userId: string, id: string): Promise<Buffer> {
