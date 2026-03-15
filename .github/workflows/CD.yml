@@ -39,6 +39,10 @@ jobs:
           JWT_REFRESH_SECRET: ${{ secrets.JWT_REFRESH_SECRET }}
           KAKAO_CLIENT_ID: ${{ secrets.KAKAO_CLIENT_ID }}
           KAKAO_REDIRECT_URI: ${{ secrets.KAKAO_REDIRECT_URI }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
         run: |
           docker run -d \
             --name freelance-hub-backend \
@@ -53,5 +57,9 @@ jobs:
             -e JWT_REFRESH_SECRET="$JWT_REFRESH_SECRET" \
             -e KAKAO_CLIENT_ID="$KAKAO_CLIENT_ID" \
             -e KAKAO_REDIRECT_URI="$KAKAO_REDIRECT_URI" \
+            -e SMTP_HOST="$SMTP_HOST" \
+            -e SMTP_PORT="$SMTP_PORT" \
+            -e SMTP_USER="$SMTP_USER" \
+            -e SMTP_PASS="$SMTP_PASS" \
             -p 3000:3000 \
             smw0807/freelance-hub-backend:1.0.0
