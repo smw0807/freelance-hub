@@ -29,6 +29,11 @@ async function main() {
   await prisma.timeLog.deleteMany({ where: { projectId: { in: existingProjectIds } } });
   await prisma.checklistItem.deleteMany({ where: { projectId: { in: existingProjectIds } } });
   await prisma.quote.deleteMany({ where: { projectId: { in: existingProjectIds } } });
+  // 시드용 quoteNo/contractNo는 전역 unique → 다른 유저/이전 데이터와 충돌 방지
+  const SEED_QUOTE_NOS = ['QT-2026-001', 'QT-2026-002', 'QT-2025-001', 'QT-2025-002'];
+  const SEED_CONTRACT_NOS = ['CT-2025-001', 'CT-2025-002', 'CT-2025-003', 'CT-2026-001', 'CT-2026-002'];
+  await prisma.quote.deleteMany({ where: { quoteNo: { in: SEED_QUOTE_NOS } } });
+  await prisma.contract.deleteMany({ where: { contractNo: { in: SEED_CONTRACT_NOS } } });
   await prisma.contract.deleteMany({ where: { userId: user.id } });
   await prisma.project.deleteMany({ where: { userId: user.id } });
   await prisma.client.deleteMany({ where: { userId: user.id } });
@@ -773,8 +778,14 @@ async function main() {
   const smtpUser = process.env.SMTP_USER;
   if (smtpUser) {
     console.log('\n📧 테스트 이메일 발송 중...');
+    const rawHost = process.env.SMTP_HOST ?? '';
+    const host =
+      !rawHost || rawHost.includes('@') ? 'smtp.gmail.com' : rawHost;
+    if (rawHost && rawHost.includes('@')) {
+      console.warn(`⚠️  SMTP_HOST("${rawHost}")에 @ 문자 포함 → smtp.gmail.com으로 대체`);
+    }
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST ?? 'smtp.gmail.com',
+      host,
       port: Number(process.env.SMTP_PORT ?? 587),
       secure: false,
       auth: { user: smtpUser, pass: process.env.SMTP_PASS },
@@ -790,7 +801,7 @@ async function main() {
   <li>✅ <strong>[알림테스트] D-7 마감 프로젝트</strong> — ${addDays(today, 7).toLocaleDateString('ko-KR')} 마감</li>
   <li>✅ <strong>[알림테스트] 미수금 독촉 프로젝트</strong> — 7일 전 납품, 잔금 미수령</li>
 </ul>
-<p>스케줄러(매일 09:00 KST)가 실행되면 각 알림 이메일이 자동 발송됩니다.</p>
+<p>스케줄러(매일 10:10 KST)가 실행되면 각 알림 이메일이 자동 발송됩니다.</p>
 <p><a href="${frontendUrl}">FreelanceHub 바로가기 →</a></p>
 <hr>
 <p style="color:#888;font-size:12px;">이 메일은 seed 스크립트 실행 시 자동 발송되는 테스트 이메일입니다.</p>`;

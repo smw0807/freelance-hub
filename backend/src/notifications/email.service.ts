@@ -13,9 +13,21 @@ export class EmailService {
       this.logger.warn('SMTP_USER not set — email notifications disabled');
       return;
     }
+    const rawHost = this.config.get<string>('SMTP_HOST') ?? '';
+    // SMTP_HOST에 '@'가 포함되거나 비어있으면 smtp.gmail.com으로 강제
+    const host =
+      !rawHost || rawHost.includes('@') ? 'smtp.gmail.com' : rawHost;
+    const port = this.config.get<number>('SMTP_PORT') ?? 587;
+
+    if (rawHost && rawHost.includes('@')) {
+      this.logger.warn(
+        `SMTP_HOST("${rawHost}")에 @ 문자가 포함되어 있습니다. smtp.gmail.com으로 대체합니다.`,
+      );
+    }
+
     this.transporter = nodemailer.createTransport({
-      host: this.config.get<string>('SMTP_HOST') ?? 'smtp.gmail.com',
-      port: this.config.get<number>('SMTP_PORT') ?? 587,
+      host,
+      port,
       secure: false,
       auth: {
         user,
