@@ -17,7 +17,7 @@ export class EmailService {
     // SMTP_HOST에 '@'가 포함되거나 비어있으면 smtp.gmail.com으로 강제
     const host =
       !rawHost || rawHost.includes('@') ? 'smtp.gmail.com' : rawHost;
-    const port = this.config.get<number>('SMTP_PORT') ?? 587;
+    const port = Number(this.config.get<number>('SMTP_PORT') ?? 587);
 
     if (rawHost && rawHost.includes('@')) {
       this.logger.warn(
